@@ -14,6 +14,10 @@ public class HomeController : ControllerBase
 		_logger = logger;
 	}
 
+	/// <summary>
+	/// A endpoint to test it works
+	/// </summary>
+	/// <returns></returns>
 	[HttpGet]
 	public IActionResult Index()
 	{
