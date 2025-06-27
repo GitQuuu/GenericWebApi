@@ -1,10 +1,10 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Api.Models;
 
 namespace Api.Controllers;
 
-public class HomeController : Controller
+[ApiController]
+[Route("api/[controller]")]
+public class HomeController : ControllerBase
 {
 	private readonly ILogger<HomeController> _logger;
 
@@ -13,19 +13,11 @@ public class HomeController : Controller
 		_logger = logger;
 	}
 
+	[HttpGet]
 	public IActionResult Index()
 	{
-		return View();
+		return Ok("Get works");
 	}
 
-	public IActionResult Privacy()
-	{
-		return View();
-	}
 
-	[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-	public IActionResult Error()
-	{
-		return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-	}
 }
