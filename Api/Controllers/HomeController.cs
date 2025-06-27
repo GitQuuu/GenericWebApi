@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -17,6 +18,17 @@ public class HomeController : ControllerBase
 	public IActionResult Index()
 	{
 		return Ok("Get works");
+	}
+	
+	/// <summary>
+	/// Protected endpoint
+	/// </summary>
+	/// <returns></returns>
+	[HttpGet("Protected")]
+	[Authorize]
+	public IActionResult Protected()
+	{
+		return Ok("Protected endpoint authorized");
 	}
 
 
