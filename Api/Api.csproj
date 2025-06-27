@@ -18,6 +18,10 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.5"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.5"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.5"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.1" />
     </ItemGroup>
 
     <ItemGroup>
