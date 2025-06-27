@@ -105,7 +105,11 @@ if (app.Environment.IsDevelopment())
 {
 	app.UseMigrationsEndPoint();
 	app.UseSwagger();
-	app.UseSwaggerUI(); // default UI at /swagger
+	app.UseSwaggerUI(options =>
+	{
+		options.RoutePrefix = string.Empty; // ✅ Swagger at root URL
+		options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+	});
 }
 else
 {
