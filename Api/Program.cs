@@ -1,6 +1,11 @@
+using System.Reflection;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Api.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +18,85 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
 	   .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllers();
+// ✅ Add Swagger generator
+builder.Services.AddEndpointsApiExplorer();
+// ✅ Add Authentication services (e.g., JWT)
+builder.Services.AddAuthentication(options =>
+	   {
+		   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+		   options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
+	   })
+	   .AddJwtBearer(options =>
+	   {
+		   // Replace with your actual authority / issuer
+		   options.Authority = "https://your-auth-server.com";
+
+		   // If you're not using Authority, you can manually set the parameters
+		   options.TokenValidationParameters = new TokenValidationParameters
+		   {
+			   ValidateIssuer = true,
+			   ValidIssuer    = "https://your-auth-server.com",
+
+			   ValidateAudience = true,
+			   ValidAudience    = "your-api-audience",
+
+			   ValidateLifetime = true, // Validates exp and nbf
+
+			   ValidateIssuerSigningKey = true,
+			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-signing-key")),
+
+			   ClockSkew = TimeSpan.FromMinutes(2) // Allow small time drift
+		   };
+
+		   // Optional events for logging, error handling, etc.
+		   options.Events = new JwtBearerEvents
+		   {
+			   OnAuthenticationFailed = context =>
+			   {
+				   Console.WriteLine($"Authentication failed: {context.Exception}");
+				   return Task.CompletedTask;
+			   },
+			   OnTokenValidated = context =>
+			   {
+				   Console.WriteLine($"Token validated for: {context.Principal.Identity?.Name}");
+				   return Task.CompletedTask;
+			   }
+		   };
+	   });
+
+builder.Services.AddSwaggerGen(options =>
+{
+	options.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
+
+	// Add XML comments if needed
+	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+	options.IncludeXmlComments(xmlPath);
+	
+	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		Name         = "Authorization",
+		Type         = SecuritySchemeType.ApiKey,
+		Scheme       = "Bearer",
+		BearerFormat = "JWT",
+		In           = ParameterLocation.Header,
+		Description  = "Enter 'Bearer' [space] and then your token.",
+	});
+
+	options.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme {
+				Reference = new OpenApiReference {
+					Type = ReferenceType.SecurityScheme,
+					Id   = "Bearer"
+				}
+			},
+			Array.Empty<string>()
+		}
+	});
+	
+});
 
 var app = builder.Build();
 
@@ -20,6 +104,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
 	app.UseMigrationsEndPoint();
+	app.UseSwagger();
+	app.UseSwaggerUI(); // default UI at /swagger
 }
 else
 {
@@ -32,7 +118,9 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication(); 
 app.UseAuthorization();
+
 
 app.MapStaticAssets();
 
