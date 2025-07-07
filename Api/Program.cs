@@ -29,16 +29,17 @@ builder.Services.AddAuthentication(options =>
 	   .AddJwtBearer(options =>
 	   {
 		   // Replace with your actual authority / issuer
-		   options.Authority = "https://your-auth-server.com";
-
+		   options.Authority = "localhost:5001";
+			options.RequireHttpsMetadata = false;
 		   // If you're not using Authority, you can manually set the parameters
 		   options.TokenValidationParameters = new TokenValidationParameters
 		   {
+			   
 			   ValidateIssuer = true,
-			   ValidIssuer    = "https://your-auth-server.com",
+			   ValidIssuer    = "localhost:5001",
 
 			   ValidateAudience = true,
-			   ValidAudience    = "your-api-audience",
+			   ValidAudience    = "localhost:5001",
 
 			   ValidateLifetime = true, // Validates exp and nbf
 
