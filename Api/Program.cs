@@ -34,16 +34,16 @@ builder.Services.AddAuthentication(options =>
 	   .AddJwtBearer(options =>
 	   {
 		   options.Authority = "https://emerging-sponge-52.clerk.accounts.dev";
-		   options.Audience  = "MyGenericApi";
+		   options.Audience  = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience not found in appsettings.json") ;;
 		   options.RequireHttpsMetadata = false;
 		   // If you're not using Authority, you can manually set the parameters
 		   options.TokenValidationParameters = new TokenValidationParameters
 		   {
 			   ValidateIssuer = true,
 			   ValidateAudience = true,
-			   ValidateLifetime = true, // Validates exp and nbf
+			   ValidateLifetime = true,
 			   ValidateIssuerSigningKey = true,
-			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("sk_test_jbLXhqhdFr6oNlN8V6kjuhBc0yCarot9C9rQeeqTZe")),
+			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey not found in appsettings.json"))),
 			   ClockSkew = TimeSpan.FromMinutes(2) // Allow small time drift
 		   };
 
