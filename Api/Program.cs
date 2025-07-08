@@ -15,11 +15,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 														options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	   .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>( options => 
+															 options.SignIn.RequireConfirmedAccount = true)
+	   .AddRoles<IdentityRole>()
+	   .AddEntityFrameworkStores<ApplicationDbContext>()
+	   .AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 // ✅ Add Swagger generator
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IdentitySeeder>();
 // ✅ Add Authentication services (e.g., JWT)
 builder.Services.AddAuthentication(options =>
 	   {
@@ -101,6 +106,12 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+	var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+	await seeder.SeedAsync();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -126,7 +137,6 @@ app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
 
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
@@ -134,7 +144,5 @@ app.MapControllerRoute(
 					   pattern : "{controller=Home}/{action=Index}/{id?}")
    .WithStaticAssets();
 
-app.MapRazorPages()
-   .WithStaticAssets();
 
 app.Run();

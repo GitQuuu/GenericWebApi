@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -50,10 +51,12 @@ public class HomeController : ControllerBase
 	[HttpPost("Login")]
 	public IActionResult Login([FromBody] LoginRequest loginRequest)
 	{
-		// Replace this with your actual user authentication logic
-		if (loginRequest.Email == "TestUser" && loginRequest.Password == "Password123")
+		var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+		var user = userManager.FindByEmailAsync(loginRequest.Email).Result;
+
+		if (user != null && userManager.CheckPasswordAsync(user, loginRequest.Password).Result)
 		{
-			var token = GenerateJwtToken(loginRequest.Email);
+			var token = GenerateJwtToken(user.UserName);
 			return Ok(new { Token = token });
 		}
 
