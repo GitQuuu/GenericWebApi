@@ -14,6 +14,8 @@ public class UserController : ControllerBase
 	[Authorize]
 	public async Task<IActionResult> GetProfile()
 	{
-		return Ok("Protected resource works");
+		var claims = User.Claims.Select(c => new { c.Type, c.Value });
+		return Ok(claims);
+		
 	}
 }
