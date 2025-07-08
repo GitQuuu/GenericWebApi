@@ -12,8 +12,8 @@ public class UserController : ControllerBase
 {
 	[HttpGet]
 	[Authorize]
-	public async Task<IActionResult> Get()
+	public async Task<IActionResult> GetProfile()
 	{
-		return Ok("Get works");
+		return Ok("Protected resource works");
 	}
 }
