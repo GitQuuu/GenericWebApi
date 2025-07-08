@@ -33,23 +33,25 @@ builder.Services.AddAuthentication(options =>
 	   })
 	   .AddJwtBearer(options =>
 	   {
-		   // Replace with your actual authority / issuer
-		   options.Authority = "localhost:5001";
+		   
+		   options.Authority = "https://emerging-sponge-52.clerk.accounts.dev";
+		   options.Audience  = "MyGenericApi"; // or the exact string shown in your token's `aud`
+
 			options.RequireHttpsMetadata = false;
 		   // If you're not using Authority, you can manually set the parameters
 		   options.TokenValidationParameters = new TokenValidationParameters
 		   {
 			   
 			   ValidateIssuer = true,
-			   ValidIssuer    = "localhost:5001",
+			   ValidIssuer    = "https://emerging-sponge-52.clerk.accounts.dev",
 
 			   ValidateAudience = true,
-			   ValidAudience    = "localhost:5001",
+			   ValidAudience    = "MyGenericApi",
 
 			   ValidateLifetime = true, // Validates exp and nbf
 
 			   ValidateIssuerSigningKey = true,
-			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-signing-key")),
+			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("sk_test_jbLXhqhdFr6oNlN8V6kjuhBc0yCarot9C9rQeeqTZe")),
 
 			   ClockSkew = TimeSpan.FromMinutes(2) // Allow small time drift
 		   };
@@ -116,6 +118,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
 	app.UseMigrationsEndPoint();
+	app.UseCors(x => 
+					x.AllowAnyHeader()
+					 .AllowAnyMethod()
+					 .AllowAnyOrigin()
+					 );
 	app.UseSwagger();
 	app.UseSwaggerUI(options =>
 	{
