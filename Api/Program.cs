@@ -25,6 +25,7 @@ builder.Services.AddControllers();
 // ✅ Add Swagger generator
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IdentitySeeder>();
+builder.Services.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
 // ✅ Add Authentication services (e.g., JWT)
 builder.Services.AddAuthentication(options =>
 	   {
