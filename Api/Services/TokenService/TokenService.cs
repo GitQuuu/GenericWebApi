@@ -1,21 +1,28 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services.TokenService;
 
+/// <summary>
+/// The TokenService class provides functionality to generate JWT tokens for authenticated users.
+/// </summary>
 public class TokenService : ITokenService
 {
 	private readonly IConfiguration _cfg;
 	private readonly TimeProvider _timeProvider;
-	private readonly IIdentityService _identityService;
+	private readonly UserManager<IdentityUser> _userManager;
 
-	public TokenService(IConfiguration cfg, TimeProvider timeProvider, IIdentityService identityService)
+	public TokenService(IConfiguration cfg, TimeProvider timeProvider, UserManager<IdentityUser> userManager)
 	{
 		_cfg             = cfg;
 		_timeProvider    = timeProvider;
-		_identityService = identityService;
+		_userManager = userManager;
 	}
 
-	public async Task<(string Token, DateTimeOffset ExpiresAt)> CreateForUserAsync(ApplicationUser user)
+	public async Task<(string Token, DateTimeOffset ExpiresAt)> CreateForUserAsync(IdentityUser user)
 	{
 		var now      = _timeProvider.GetUtcNow();
 		var issuer   = _cfg["Auth:Local:Issuer"];
@@ -33,7 +40,8 @@ public class TokenService : ITokenService
 			new (ClaimTypes.Email, user.Email ?? string.Empty),
 		};
 
-		var roles = await _identityService.GetRolesAsync(user.Id);
+		var identityUser  = await _userManager.FindByIdAsync(user.Id);
+		var roles = await _userManager.GetRolesAsync(identityUser);
 		claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
 		var jwt = new JwtSecurityToken(
