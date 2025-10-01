@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Api.Services.IdentityProviderService;
 
-public class IdentityProviderService : IIdentityProviderService
+/// <summary>
+/// Service responsible for handling identity provider integrations and operations.
+/// </summary>
+public partial class IdentityProviderService : IIdentityProviderService
 {
 	private readonly UserManager<IdentityUser> _userManager;
 	private readonly IConfiguration _configuration;
