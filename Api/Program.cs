@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Text;
+using Api.Services.IdentityProviderService;
+using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DAL;
@@ -26,6 +28,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IdentitySeeder>();
 builder.Services.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IIdentityProviderService, IdentityProviderService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 // ✅ Add Authentication services (e.g., JWT)
 builder.Services.AddAuthentication(options =>
 	   {
