@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using Api.Services.IdentityProviderService;
 using Api.Services.TokenService;
@@ -30,43 +31,96 @@ builder.Services.AddScoped<IdentitySeeder>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IIdentityProviderService, IdentityProviderService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-// ✅ Add Authentication services (e.g., JWT)
 builder.Services.AddAuthentication(options =>
-	   {
-		   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		   options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
-	   })
-	   .AddJwtBearer(options =>
-	   {
-		   options.Authority = "https://emerging-sponge-52.clerk.accounts.dev";
-		   options.Audience  = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience not found in appsettings.json") ;;
-		   options.RequireHttpsMetadata = false;
-		   // If you're not using Authority, you can manually set the parameters
-		   options.TokenValidationParameters = new TokenValidationParameters
-		   {
-			   ValidateIssuer = true,
-			   ValidateAudience = true,
-			   ValidateLifetime = true,
-			   ValidateIssuerSigningKey = true,
-			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey not found in appsettings.json"))),
-			   ClockSkew = TimeSpan.FromMinutes(2) // Allow small time drift
-		   };
+               {
+                   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; //  local JWT
+                   options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
+               })
 
-		   // Optional events for logging, error handling, etc.
-		   options.Events = new JwtBearerEvents
-		   {
-			   OnAuthenticationFailed = context =>
-			   {
-				   Console.WriteLine($"Authentication failed: {context.Exception}");
-				   return Task.CompletedTask;
-			   },
-			   OnTokenValidated = context =>
-			   {
-				   Console.WriteLine($"Token validated for: {context.Principal.Identity?.Name}");
-				   return Task.CompletedTask;
-			   }
-		   };
-	   });
+               // Local JWT (already in your code)
+               .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+               {
+                   options.RequireHttpsMetadata = true;
+                   options.SaveToken            = true;
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuer           = true,
+                       ValidIssuer              = builder.Configuration["Auth:Local:Issuer"],
+                       ValidateAudience         = true,
+                       ValidAudience            = builder.Configuration["Auth:Local:Audience"],
+                       ValidateLifetime         = true,
+                       ValidateIssuerSigningKey = true,
+                       IssuerSigningKey = new SymmetricSecurityKey(
+                                                                   Encoding.UTF8.GetBytes(builder.Configuration["Auth:Local:SigningKey"]!)),
+                       ClockSkew     = TimeSpan.FromMinutes(3),
+                       NameClaimType = ClaimTypes.Name,
+                       RoleClaimType = ClaimTypes.Role,
+                   };
+               })
+
+               // Entra (Microsoft) scheme used only by /api/auth/exchange
+               .AddJwtBearer("Entra", options =>
+               {
+                   options.Authority = builder.Configuration["Auth:Entra:Authority"];
+                   options.Audience  = builder.Configuration["Auth:Entra:Audience"]; 
+
+                   // Optional hardening:
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       // If single tenant, validate exact issuer:
+                       // ValidIssuer = $"https://login.microsoftonline.com/{builder.Configuration["Auth:Entra:TenantId"]}/v2.0",
+                       ValidateIssuer = false,
+
+                       // For multi-tenant, you can leave issuer flexible and check tid in events (below).
+                       NameClaimType = "email",
+                   };
+
+                   // Optional: reject tokens from other tenants (multi-tenant guard)
+                   options.Events = new JwtBearerEvents
+                   {
+                       OnTokenValidated = ctx =>
+                       {
+                           var requiredTid = builder.Configuration["Auth:Entra:TenantId"];
+                           if (!string.IsNullOrEmpty(requiredTid))
+                           {
+                               var tid = ctx.Principal?.FindFirst("tid")?.Value;
+                               if (!string.Equals(tid, requiredTid, StringComparison.OrdinalIgnoreCase))
+                                   ctx.Fail("Invalid tenant.");
+                           }
+
+                           return Task.CompletedTask;
+                       }
+                   };
+               })
+               .AddJwtBearer("Google", options =>
+               {
+                   options.Authority = "https://accounts.google.com";
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuer = true,
+                       ValidIssuers = new[]
+                       {
+                           "https://accounts.google.com",
+                           "accounts.google.com"
+                       },
+                       ValidateAudience = true,
+                       ValidAudience    = builder.Configuration["Auth:Google:ClientId"], // your Web Client ID
+                       ValidateLifetime = true,
+                       NameClaimType    = "email",
+                       RoleClaimType    = "roles"
+                   };
+
+                   // prevent HTML/redirect challenges on APIs
+                   options.Events = new JwtBearerEvents
+                   {
+                       OnChallenge = ctx =>
+                       {
+                           ctx.HandleResponse();
+                           ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                           return Task.CompletedTask;
+                       }
+                   };
+               });
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -122,7 +176,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI(options =>
 	{
-		options.RoutePrefix = string.Empty; // ✅ Swagger at root URL
+		options.RoutePrefix = string.Empty; // ✅ Swagger at root URL (which will be /api)
 		options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 	});
 }
