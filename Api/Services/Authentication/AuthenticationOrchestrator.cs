@@ -34,7 +34,7 @@ public class AuthenticationOrchestrator : IAuthenticationOrchestrator
 	/// <exception cref="NotImplementedException"></exception>
 	public async Task<IActionResult> HandleEntraLoginAsync()
 	{
-		ClaimsPrincipal principal     = _httpContextAccessor.HttpContext?.User;
+		ClaimsPrincipal principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
 		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal);
 
 		return await _responseService.HandleResultAsync(entraResponse);
@@ -47,7 +47,7 @@ public class AuthenticationOrchestrator : IAuthenticationOrchestrator
 	/// <exception cref="NotImplementedException"></exception>
 	public async Task<IActionResult> HandleEntraGoogleAsync()
 	{
-		ClaimsPrincipal              principal     = _httpContextAccessor.HttpContext?.User;
+		ClaimsPrincipal              principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
 		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal);
 
 		return await _responseService.HandleResultAsync(entraResponse);
