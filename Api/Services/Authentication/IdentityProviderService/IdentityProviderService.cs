@@ -1,4 +1,3 @@
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Services.IdentityProviderService;
@@ -11,12 +10,10 @@ public partial class IdentityProviderService : IIdentityProviderService
 	private readonly UserManager<IdentityUser> _userManager;
 	private readonly IConfiguration _configuration;
 
-	public IdentityProviderService(
-		UserManager<IdentityUser> userManager,
-		IConfiguration configuration)
+	public IdentityProviderService(UserManager<IdentityUser> userManager,
+								   IConfiguration configuration)
 	{
-		_userManager = userManager;
+		_userManager   = userManager;
 		_configuration = configuration;
 	}
-	
 }

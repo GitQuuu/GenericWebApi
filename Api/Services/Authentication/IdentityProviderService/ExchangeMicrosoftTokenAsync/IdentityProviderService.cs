@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using System.Security.Claims;
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Services.IdentityProviderService;
 
 public partial class IdentityProviderService
 {
-		public async Task<ServiceResult<IdentityUser>> ExchangeMicrosoftTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
+	/// <inheritdoc />
+	public async Task<ServiceResult<IdentityUser>> ExchangeMicrosoftTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
 	{
 		if (principal?.Identity?.IsAuthenticated != true)
 		{
