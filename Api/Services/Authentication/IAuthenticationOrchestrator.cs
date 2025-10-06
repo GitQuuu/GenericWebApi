@@ -2,6 +2,10 @@
 
 namespace Api.Services.Authentication;
 
+/// <summary>
+/// Defines methods to orchestrate different authentication flows, including handling login processes
+/// for external identity providers such as Microsoft Entra ID and Google.
+/// </summary>
 public interface IAuthenticationOrchestrator
 {
 	/// <summary>

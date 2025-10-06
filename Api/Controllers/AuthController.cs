@@ -1,9 +1,6 @@
 ﻿using Api.Services.Authentication;
-using Api.Services.IdentityProviderService;
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services.ResponseService;
 
 namespace Api.Controllers;
 
@@ -15,6 +12,8 @@ namespace Api.Controllers;
 public class AuthController : ControllerBase
 {
 	private readonly IAuthenticationOrchestrator _orchestrator;
+
+	/// <inheritdoc />
 	public AuthController(IAuthenticationOrchestrator orchestrator)
 	{
 		_orchestrator       = orchestrator;
@@ -41,9 +40,7 @@ public class AuthController : ControllerBase
 	[Authorize(AuthenticationSchemes = "Entra")]
 	public async Task<IActionResult> ExchangeMicrosoft(CancellationToken ct)
 	{
-
 		return await _orchestrator.HandleEntraLoginAsync(ct);
-
 	}
 
 	/// <summary>
