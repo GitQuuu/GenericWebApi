@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
 	/// <para>- `AAD_API_SCOPE`: The scope string that targets the backend API. It includes the API’s client ID and the permission name (e.g., `access_as_user`).</para>
 	/// <para>- `TENANT`: Typically set to `common` for multi-tenant apps, or a specific tenant ID for single-tenant scenarios.</para>
 	/// <para>- `REDIRECT_URI`: The URI where Azure AD redirects after authentication. Must match the SPA app registration.</para>
-	/// <para>During authentication, the SPA requests a token for the API scope. Azure AD issues a token with:</para>
+	/// <para>During authentication, the SPA requests a token for the API scope. Azure Entra issues a token with:</para>
 	/// <para>- `aud`: The API’s client ID</para>
 	/// <para>- `scp`: The requested permission (e.g., `access_as_user`)</para>
 	/// <para>The backend validates this token and grants access accordingly.</para>
@@ -59,6 +59,20 @@ public class AuthController : ControllerBase
 		return await _responseService.HandleResultAsync(response);
 	}
 
+	/// <summary>
+	/// Exchanges a Google authentication token for a locally authenticated token.
+	/// </summary>
+	/// <param name="ct">A CancellationToken to observe while waiting for the operation to complete.</param>
+	/// <remarks>
+	/// <para># Google OAuth Configuration</para>
+	/// <para>This endpoint uses Google's JWT Bearer authentication. The configuration requires:</para>
+	/// <para>- `ClientId`: The OAuth 2.0 client ID obtained from Google Cloud Console. This identifies your application to Google.</para>
+	/// <para>- `ClientSecret`: The OAuth 2.0 client secret obtained from Google Cloud Console. Used for secure communication with Google's authentication servers.</para>
+	/// <para>The Google ID token is automatically validated against the configured verification parameters. Upon</para>
+	/// <para>successful validation, the user's claims are extracted, and the backend exchanges</para>
+	/// <para>this token for a locally authenticated token to facilitate subsequent API interactions.</para>
+	/// </remarks>
+	/// <returns>An IActionResult containing either a successful response with the locally authenticated token or an error if authentication fails.</returns>
 	[HttpPost("ExchangeGoogle")]
 	[Authorize(AuthenticationSchemes = "Google")]
 	public async Task<IActionResult> ExchangeGoogle(CancellationToken ct)
