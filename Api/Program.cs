@@ -1,11 +1,15 @@
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
+using Api.Services.IdentityProviderService;
+using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Api.Data;
+using DAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services.ResponseService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,55 +19,110 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 														options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	   .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>( options => 
+															 options.SignIn.RequireConfirmedAccount = true)
+	   .AddRoles<IdentityRole>()
+	   .AddEntityFrameworkStores<ApplicationDbContext>()
+	   .AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 // ✅ Add Swagger generator
 builder.Services.AddEndpointsApiExplorer();
-// ✅ Add Authentication services (e.g., JWT)
+builder.Services.AddScoped<IdentitySeeder>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IIdentityProviderService, IdentityProviderService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IResponseService, ResponseService>();
 builder.Services.AddAuthentication(options =>
-	   {
-		   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		   options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
-	   })
-	   .AddJwtBearer(options =>
-	   {
-		   // Replace with your actual authority / issuer
-		   options.Authority = "localhost:5001";
-			options.RequireHttpsMetadata = false;
-		   // If you're not using Authority, you can manually set the parameters
-		   options.TokenValidationParameters = new TokenValidationParameters
-		   {
-			   
-			   ValidateIssuer = true,
-			   ValidIssuer    = "localhost:5001",
+               {
+                   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; //  local JWT
+                   options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
+               })
 
-			   ValidateAudience = true,
-			   ValidAudience    = "localhost:5001",
+               // Local JWT (already in your code)
+               .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+               {
+                   options.RequireHttpsMetadata = true;
+                   options.SaveToken            = true;
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuer           = true,
+                       ValidIssuer              = builder.Configuration["Auth:Local:Issuer"],
+                       ValidateAudience         = true,
+                       ValidAudience            = builder.Configuration["Auth:Local:Audience"],
+                       ValidateLifetime         = true,
+                       ValidateIssuerSigningKey = true,
+                       IssuerSigningKey = new SymmetricSecurityKey(
+                                                                   Encoding.UTF8.GetBytes(builder.Configuration["Auth:Local:SigningKey"]!)),
+                       ClockSkew     = TimeSpan.FromMinutes(3),
+                       NameClaimType = ClaimTypes.Name,
+                       RoleClaimType = ClaimTypes.Role,
+                   };
+               })
 
-			   ValidateLifetime = true, // Validates exp and nbf
+               // Entra (Microsoft) scheme used only by /api/auth/exchange
+               .AddJwtBearer("Entra", options =>
+               {
+                   options.Authority = builder.Configuration["Auth:Entra:Authority"];
+                   options.Audience  = builder.Configuration["Auth:Entra:Audience"]; 
 
-			   ValidateIssuerSigningKey = true,
-			   IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-signing-key")),
+                   // Optional hardening:
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       // If single tenant, validate exact issuer:
+                       // ValidIssuer = $"https://login.microsoftonline.com/{builder.Configuration["Auth:Entra:TenantId"]}/v2.0",
+                       ValidateIssuer = false,
 
-			   ClockSkew = TimeSpan.FromMinutes(2) // Allow small time drift
-		   };
+                       // For multi-tenant, you can leave issuer flexible and check tid in events (below).
+                       NameClaimType = "email",
+                   };
 
-		   // Optional events for logging, error handling, etc.
-		   options.Events = new JwtBearerEvents
-		   {
-			   OnAuthenticationFailed = context =>
-			   {
-				   Console.WriteLine($"Authentication failed: {context.Exception}");
-				   return Task.CompletedTask;
-			   },
-			   OnTokenValidated = context =>
-			   {
-				   Console.WriteLine($"Token validated for: {context.Principal.Identity?.Name}");
-				   return Task.CompletedTask;
-			   }
-		   };
-	   });
+                   // Optional: reject tokens from other tenants (multi-tenant guard)
+                   options.Events = new JwtBearerEvents
+                   {
+                       OnTokenValidated = ctx =>
+                       {
+                           var requiredTid = builder.Configuration["Auth:Entra:TenantId"];
+                           if (!string.IsNullOrEmpty(requiredTid))
+                           {
+                               var tid = ctx.Principal?.FindFirst("tid")?.Value;
+                               if (!string.Equals(tid, requiredTid, StringComparison.OrdinalIgnoreCase))
+                                   ctx.Fail("Invalid tenant.");
+                           }
+
+                           return Task.CompletedTask;
+                       }
+                   };
+               })
+               .AddJwtBearer("Google", options =>
+               {
+                   options.Authority = "https://accounts.google.com";
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuer = true,
+                       ValidIssuers = new[]
+                       {
+                           "https://accounts.google.com",
+                           "accounts.google.com"
+                       },
+                       ValidateAudience = true,
+                       ValidAudience    = builder.Configuration["Auth:Google:ClientId"], // your Web Client ID
+                       ValidateLifetime = true,
+                       NameClaimType    = "email",
+                       RoleClaimType    = "roles"
+                   };
+
+                   // prevent HTML/redirect challenges on APIs
+                   options.Events = new JwtBearerEvents
+                   {
+                       OnChallenge = ctx =>
+                       {
+                           ctx.HandleResponse();
+                           ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                           return Task.CompletedTask;
+                       }
+                   };
+               });
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -101,14 +160,25 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+	var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+	await seeder.SeedAsync();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
 	app.UseMigrationsEndPoint();
+	app.UseCors(x => 
+					x.AllowAnyHeader()
+					 .AllowAnyMethod()
+					 .AllowAnyOrigin()
+					 );
 	app.UseSwagger();
 	app.UseSwaggerUI(options =>
 	{
-		options.RoutePrefix = string.Empty; // ✅ Swagger at root URL
+		options.RoutePrefix = string.Empty; // ✅ Swagger at root URL (which will be /api)
 		options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 	});
 }
@@ -126,7 +196,6 @@ app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
 
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
@@ -134,7 +203,5 @@ app.MapControllerRoute(
 					   pattern : "{controller=Home}/{action=Index}/{id?}")
    .WithStaticAssets();
 
-app.MapRazorPages()
-   .WithStaticAssets();
 
 app.Run();
