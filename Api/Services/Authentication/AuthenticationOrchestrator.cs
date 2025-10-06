@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Api.Services.IdentityProviderService;
 using Api.Services.TokenService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Services.ResponseService;
 
@@ -29,17 +30,19 @@ public class AuthenticationOrchestrator : IAuthenticationOrchestrator
 	
 	public async Task<IActionResult> HandleEntraLoginAsync(CancellationToken ctx = default)
 	{
-		ClaimsPrincipal principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
-		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal);
+		ClaimsPrincipal             principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
+		ServiceResult<IdentityUser> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal, ctx);
+		var                         tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
 
-		return await _responseService.HandleResultAsync(entraResponse);
+		return await _responseService.HandleResultAsync(tokenResponse);
 	}
 	
 	public async Task<IActionResult> HandleEntraGoogleAsync(CancellationToken ctx = default)
 	{
-		ClaimsPrincipal              principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
-		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal);
+		ClaimsPrincipal             principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
+		ServiceResult<IdentityUser> entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal);
+		var                         tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
 
-		return await _responseService.HandleResultAsync(entraResponse);
+		return await _responseService.HandleResultAsync(tokenResponse);
 	}
 }

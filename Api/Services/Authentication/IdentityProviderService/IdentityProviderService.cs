@@ -10,16 +10,13 @@ public partial class IdentityProviderService : IIdentityProviderService
 {
 	private readonly UserManager<IdentityUser> _userManager;
 	private readonly IConfiguration _configuration;
-	private readonly ITokenService _tokenService;
 
 	public IdentityProviderService(
 		UserManager<IdentityUser> userManager,
-		IConfiguration configuration,
-		ITokenService tokenService)
+		IConfiguration configuration)
 	{
 		_userManager = userManager;
 		_configuration = configuration;
-		_tokenService = tokenService;
 	}
 	
 }

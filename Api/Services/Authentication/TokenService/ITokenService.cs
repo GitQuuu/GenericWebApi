@@ -4,5 +4,5 @@ namespace Api.Services.TokenService;
 
 public interface ITokenService 
 {
-	Task<(string Token, DateTimeOffset ExpiresAt)> CreateForUserAsync(IdentityUser user);
+	Task<ServiceResult<TokenResponse>> CreateForUserAsync(IdentityUser user);
 }
