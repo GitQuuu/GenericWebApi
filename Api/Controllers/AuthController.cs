@@ -2,6 +2,7 @@
 using Api.Services.TokenService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services.ResponseService;
 
 namespace Api.Controllers;
 
@@ -14,39 +15,46 @@ public class AuthController : ControllerBase
 {
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly IIdentityProviderService _identityProviderService;
+	private readonly IResponseService _responseService;
 
-	public AuthController(IHttpContextAccessor httpContextAccessor, 
-						  IIdentityProviderService identityProviderService)
+	public AuthController(IHttpContextAccessor httpContextAccessor,
+						  IIdentityProviderService identityProviderService,
+						  IResponseService responseService)
 	{
-		_httpContextAccessor          = httpContextAccessor;
+		_httpContextAccessor     = httpContextAccessor;
 		_identityProviderService = identityProviderService;
+		_responseService         = responseService;
 	}
 
 	[HttpPost("ExchangeMicrosoft")]
 	[Authorize(AuthenticationSchemes = "Entra")]
-	public async Task<IResult> ExchangeMicrosoft(CancellationToken ct)
+	public async Task<IActionResult> ExchangeMicrosoft(CancellationToken ct)
 	{
 		// Entra token already validated by the "Entra" JwtBearer scheme.
 		var principal = _httpContextAccessor.HttpContext?.User;
 		if (principal?.Identity?.IsAuthenticated != true)
-			return Results.Unauthorized();
-		
+		{
+			return Unauthorized();
+		}
+
 		var response = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal, ct);
 
-		return Results.Ok(new TokenResponse(response.Data.AccessToken, response.Data.ExpiresAt));
+		return await _responseService.HandleResultAsync(response);
 	}
 
 	[HttpPost("ExchangeGoogle")]
 	[Authorize(AuthenticationSchemes = "Google")]
-	public async Task<IResult> ExchangeGoogle(CancellationToken ct)
+	public async Task<IActionResult> ExchangeGoogle(CancellationToken ct)
 	{
 		// The Google ID token was validated by JwtBearer("Google")
 		var principal = _httpContextAccessor.HttpContext?.User;
 		if (principal?.Identity?.IsAuthenticated != true)
-			return Results.Unauthorized();
-		
+		{
+			return Unauthorized();
+		}
+
 		var response = await _identityProviderService.ExchangeGoogleTokenAsync(principal, ct);
-	
-		return Results.Ok(new { response.Data.AccessToken, response.Data.ExpiresAt });
+
+		return await _responseService.HandleResultAsync(response);
 	}
 }
