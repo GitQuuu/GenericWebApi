@@ -26,26 +26,16 @@ public class AuthenticationOrchestrator : IAuthenticationOrchestrator
 		_httpContextAccessor     = httpContextAccessor;
 		_responseService		 = responseService;
 	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <returns></returns>
-	/// <exception cref="NotImplementedException"></exception>
-	public async Task<IActionResult> HandleEntraLoginAsync()
+	
+	public async Task<IActionResult> HandleEntraLoginAsync(CancellationToken ctx = default)
 	{
 		ClaimsPrincipal principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
 		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal);
 
 		return await _responseService.HandleResultAsync(entraResponse);
 	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <returns></returns>
-	/// <exception cref="NotImplementedException"></exception>
-	public async Task<IActionResult> HandleEntraGoogleAsync()
+	
+	public async Task<IActionResult> HandleEntraGoogleAsync(CancellationToken ctx = default)
 	{
 		ClaimsPrincipal              principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
 		ServiceResult<TokenResponse> entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal);
