@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +23,7 @@ public class TokenService : ITokenService
 		_userManager = userManager;
 	}
 
-	public async Task<(string Token, DateTimeOffset ExpiresAt)> CreateForUserAsync(IdentityUser user)
+	public async Task<ServiceResult<TokenResponse>> CreateForUserAsync(IdentityUser user)
 	{
 		var now      = _timeProvider.GetUtcNow();
 		var issuer   = _cfg["Auth:Local:Issuer"];
@@ -53,6 +54,6 @@ public class TokenService : ITokenService
 									   signingCredentials : creds);
 
 		var token = new JwtSecurityTokenHandler().WriteToken(jwt);
-		return (token, expires);
+		return new ServiceResult<TokenResponse>(true,HttpStatusCode.OK, token);
 	}
 }

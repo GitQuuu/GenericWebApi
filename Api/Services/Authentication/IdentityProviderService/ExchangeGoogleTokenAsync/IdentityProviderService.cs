@@ -7,13 +7,13 @@ namespace Api.Services.IdentityProviderService;
 
 public partial class IdentityProviderService
 {
-	public async Task<ServiceResult<TokenResponse>> ExchangeGoogleTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
+	public async Task<ServiceResult<IdentityUser>> ExchangeGoogleTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
 	{
 		if (principal?.Identity?.IsAuthenticated != true)
 		{
-			return new ServiceResult<TokenResponse>(false,
-													HttpStatusCode.Unauthorized,
-													"User is not authenticated");
+			return new ServiceResult<IdentityUser>(false,
+												   HttpStatusCode.Unauthorized,
+												   "User is not authenticated");
 		}
 
 		// Claims from Google ID token
@@ -26,9 +26,9 @@ public partial class IdentityProviderService
 
 		if (string.IsNullOrWhiteSpace(sub) || string.IsNullOrWhiteSpace(email))
 		{
-			return new ServiceResult<TokenResponse>(false,
-													HttpStatusCode.BadRequest,
-													"Missing required claims (sub or email)");
+			return new ServiceResult<IdentityUser>(false,
+												   HttpStatusCode.BadRequest,
+												   "Missing required claims (sub or email)");
 		}
 
 		// Find or create user
@@ -47,9 +47,9 @@ public partial class IdentityProviderService
 			if (!create.Succeeded)
 			{
 				var errors = string.Join(", ", create.Errors.Select(e => e.Description));
-				return new ServiceResult<TokenResponse>(false,
-														HttpStatusCode.BadRequest,
-														"User creation failed: " + errors);
+				return new ServiceResult<IdentityUser>(false,
+													   HttpStatusCode.BadRequest,
+													   "User creation failed: " + errors);
 				
 			}
 		}
@@ -62,18 +62,15 @@ public partial class IdentityProviderService
 		// Enforce confirmed email
 		if (!user.EmailConfirmed)
 		{
-			return new ServiceResult<TokenResponse>(false,
+			return new ServiceResult<IdentityUser>(false,
 													HttpStatusCode.Forbidden,
 													"Email address is not confirmed");
 		}
 
-		// Generate token
-		var (accessToken, expiresAt) = await _tokenService.CreateForUserAsync(user);
-		var tokenResponse = new TokenResponse(accessToken, expiresAt);
 		
-		return new ServiceResult<TokenResponse>(true,
-												HttpStatusCode.OK,
-												"Token exchanged successfully",
-												tokenResponse);
+		return new ServiceResult<IdentityUser>(true,
+											   HttpStatusCode.OK,
+											   "Token exchanged successfully",
+											   user);
 	}
 }

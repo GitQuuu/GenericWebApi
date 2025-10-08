@@ -1,8 +1,6 @@
-﻿using Api.Services.IdentityProviderService;
-using Api.Services.TokenService;
+﻿using Api.Services.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services.ResponseService;
 
 namespace Api.Controllers;
 
@@ -13,17 +11,12 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-	private readonly IHttpContextAccessor _httpContextAccessor;
-	private readonly IIdentityProviderService _identityProviderService;
-	private readonly IResponseService _responseService;
+	private readonly IAuthenticationOrchestrator _orchestrator;
 
-	public AuthController(IHttpContextAccessor httpContextAccessor,
-						  IIdentityProviderService identityProviderService,
-						  IResponseService responseService)
+	/// <inheritdoc />
+	public AuthController(IAuthenticationOrchestrator orchestrator)
 	{
-		_httpContextAccessor     = httpContextAccessor;
-		_identityProviderService = identityProviderService;
-		_responseService         = responseService;
+		_orchestrator       = orchestrator;
 	}
 
 	/// <summary>
@@ -47,16 +40,7 @@ public class AuthController : ControllerBase
 	[Authorize(AuthenticationSchemes = "Entra")]
 	public async Task<IActionResult> ExchangeMicrosoft(CancellationToken ct)
 	{
-		// Entra token already validated by the "Entra" JwtBearer scheme.
-		var principal = _httpContextAccessor.HttpContext?.User;
-		if (principal?.Identity?.IsAuthenticated != true)
-		{
-			return Unauthorized();
-		}
-
-		var response = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal, ct);
-
-		return await _responseService.HandleResultAsync(response);
+		return await _orchestrator.HandleEntraLoginAsync(ct);
 	}
 
 	/// <summary>
@@ -77,15 +61,6 @@ public class AuthController : ControllerBase
 	[Authorize(AuthenticationSchemes = "Google")]
 	public async Task<IActionResult> ExchangeGoogle(CancellationToken ct)
 	{
-		// The Google ID token was validated by JwtBearer("Google")
-		var principal = _httpContextAccessor.HttpContext?.User;
-		if (principal?.Identity?.IsAuthenticated != true)
-		{
-			return Unauthorized();
-		}
-
-		var response = await _identityProviderService.ExchangeGoogleTokenAsync(principal, ct);
-
-		return await _responseService.HandleResultAsync(response);
+		return await _orchestrator.HandleEntraGoogleAsync(ct);
 	}
 }

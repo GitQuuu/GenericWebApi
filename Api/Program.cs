@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Api.Services.Authentication;
 using Api.Services.IdentityProviderService;
 using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +31,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IdentitySeeder>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthenticationOrchestrator, AuthenticationOrchestrator>();
 builder.Services.AddScoped<IIdentityProviderService, IdentityProviderService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IResponseService, ResponseService>();

@@ -1,20 +1,20 @@
 ﻿using System.Net;
 using System.Security.Claims;
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 
 namespace Api.Services.IdentityProviderService;
 
 public partial class IdentityProviderService
 {
-		public async Task<ServiceResult<TokenResponse>> ExchangeMicrosoftTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
+	/// <inheritdoc />
+	public async Task<ServiceResult<IdentityUser>> ExchangeMicrosoftTokenAsync(ClaimsPrincipal? principal, CancellationToken ct = default)
 	{
 		if (principal?.Identity?.IsAuthenticated != true)
 		{
-			return new ServiceResult<TokenResponse>(
-													false,
-													HttpStatusCode.Unauthorized,
-													"User is not authenticated");
+			return new ServiceResult<IdentityUser>(
+												   false,
+												   HttpStatusCode.Unauthorized,
+												   "User is not authenticated");
 		}
 
 		// Optional multi-tenant allowlist guard
@@ -25,10 +25,10 @@ public partial class IdentityProviderService
 			var allowed = _configuration.GetSection("Auth:Entra:AllowedTenantIds").Get<string[]>() ?? Array.Empty<string>();
 			if (string.IsNullOrEmpty(tid) || !allowed.Contains(tid, StringComparer.OrdinalIgnoreCase))
 			{
-				return new ServiceResult<TokenResponse>(
-														false, 
-														HttpStatusCode.Forbidden, 
-														"Tenant is not allowed");
+				return new ServiceResult<IdentityUser>(
+													   false, 
+													   HttpStatusCode.Forbidden, 
+													   "Tenant is not allowed");
 			}
 		}
 
@@ -42,11 +42,11 @@ public partial class IdentityProviderService
 
 		if (string.IsNullOrWhiteSpace(providerKey) || string.IsNullOrWhiteSpace(email))
 		{
-			return new ServiceResult<TokenResponse>(
-													false, 
-													HttpStatusCode.BadRequest, 
-													"Missing required claims (oid/sub or email)"
-													);
+			return new ServiceResult<IdentityUser>(
+												   false, 
+												   HttpStatusCode.BadRequest, 
+												   "Missing required claims (oid/sub or email)"
+												  );
 		}
 		
 
@@ -61,19 +61,19 @@ public partial class IdentityProviderService
 			if (!create.Succeeded)
 			{
 				var errors = string.Join(", ", create.Errors.Select(e => e.Description));
-				return new ServiceResult<TokenResponse>(
-														false,
-														HttpStatusCode.BadRequest,
-														"User creation failed: " + errors);
+				return new ServiceResult<IdentityUser>(
+													   false,
+													   HttpStatusCode.BadRequest,
+													   "User creation failed: " + errors);
 			}
 		}
 
 		if (user.EmailConfirmed is false)
 		{
-			return new ServiceResult<TokenResponse>(
-													false,
-													HttpStatusCode.Forbidden,
-													"Email address is not confirmed");
+			return new ServiceResult<IdentityUser>(
+												   false,
+												   HttpStatusCode.Forbidden,
+												   "Email address is not confirmed");
 		}
 
 		// Ensure external login mapping exists
@@ -83,13 +83,9 @@ public partial class IdentityProviderService
 			await _userManager.AddLoginAsync(user, new UserLoginInfo("Microsoft", providerKey, "Microsoft"));
 		}
 
-		// Generate token
-		var (accessToken, expiresAt) = await _tokenService.CreateForUserAsync(user);
-		var tokenResponse = new TokenResponse(accessToken, expiresAt);
-
-		return new ServiceResult<TokenResponse>(true,
-												HttpStatusCode.OK,
-												"Token exchanged successfully",
-												tokenResponse);
+		return new ServiceResult<IdentityUser>(true,
+											   HttpStatusCode.OK,
+											   "Token exchanged successfully",
+											   user);
 	}
 }
