@@ -32,12 +32,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\Authentication\HandleEntraGoogleAsync\" />
-      <Folder Include="Services\Authentication\HandleEntraLoginAsync\" />
-      <Folder Include="Services\Authentication\IdentityProviderService\ExchangeGoogleTokenAsync\" />
-      <Folder Include="Services\Authentication\IdentityProviderService\ExchangeMicrosoftTokenAsync\" />
-      <Folder Include="Services\Authentication\TokenService\" />
-      <Folder Include="Services\ResponseService\" />
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\Error.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_Layout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_LoginPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_ValidationScriptsPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
     </ItemGroup>
 
 </Project>
