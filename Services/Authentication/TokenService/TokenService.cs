@@ -3,9 +3,10 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Api.Services.TokenService;
+namespace Services.Authentication.TokenService;
 
 /// <summary>
 /// The TokenService class provides functionality to generate JWT tokens for authenticated users.

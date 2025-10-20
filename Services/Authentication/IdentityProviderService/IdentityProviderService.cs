@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
-namespace Api.Services.IdentityProviderService;
+namespace Services.Authentication.IdentityProviderService;
 
 /// <summary>
 /// Service responsible for handling identity provider integrations and operations.

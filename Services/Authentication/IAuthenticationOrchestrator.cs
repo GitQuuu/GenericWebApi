@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Services.Authentication;
+namespace Services.Authentication;
 
 /// <summary>
 /// Defines methods to orchestrate different authentication flows, including handling login processes

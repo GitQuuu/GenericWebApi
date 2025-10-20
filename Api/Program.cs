@@ -1,16 +1,17 @@
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using Api.Services.Authentication;
-using Api.Services.IdentityProviderService;
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services.Authentication;
+using Services.Authentication.IdentityProviderService;
+using Services.Authentication.TokenService;
 using Services.ResponseService;
+using IdentityProviderService = Services.Authentication.IdentityProviderService.ExchangeMicrosoftTokenAsync.IdentityProviderService;
 
 var builder = WebApplication.CreateBuilder(args);
 

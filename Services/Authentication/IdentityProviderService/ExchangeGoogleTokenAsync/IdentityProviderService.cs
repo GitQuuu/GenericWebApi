@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System.Security.Claims;
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 
-namespace Api.Services.IdentityProviderService;
+namespace Services.Authentication.IdentityProviderService.ExchangeGoogleTokenAsync;
 
 public partial class IdentityProviderService
 {
@@ -46,7 +45,7 @@ public partial class IdentityProviderService
 			var create = await _userManager.CreateAsync(user);
 			if (!create.Succeeded)
 			{
-				var errors = string.Join(", ", create.Errors.Select(e => e.Description));
+				var errors = string.Join(", ", Enumerable.Select<IdentityError, string>(create.Errors, e => e.Description));
 				return new ServiceResult<IdentityUser>(false,
 													   HttpStatusCode.BadRequest,
 													   "User creation failed: " + errors);
@@ -56,7 +55,7 @@ public partial class IdentityProviderService
 
 		// Link external login if missing
 		var logins = await _userManager.GetLoginsAsync(user);
-		if (!logins.Any(l => l.LoginProvider == "Google" && l.ProviderKey == sub))
+		if (!Enumerable.Any<UserLoginInfo>(logins, l => l.LoginProvider == "Google" && l.ProviderKey == sub))
 			await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", sub, "Google"));
 
 		// Enforce confirmed email

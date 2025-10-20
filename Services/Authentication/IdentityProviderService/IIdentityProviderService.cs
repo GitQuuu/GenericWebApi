@@ -1,7 +1,6 @@
-using Api.Services.TokenService;
 using Microsoft.AspNetCore.Identity;
 
-namespace Api.Services.IdentityProviderService;
+namespace Services.Authentication.IdentityProviderService;
 
 public interface IIdentityProviderService
 {

@@ -1,8 +1,9 @@
-﻿using Api.Services.IdentityProviderService;
-using Api.Services.TokenService;
+﻿using Microsoft.AspNetCore.Http;
+using Services.Authentication.IdentityProviderService;
+using Services.Authentication.TokenService;
 using Services.ResponseService;
 
-namespace Api.Services.Authentication;
+namespace Services.Authentication;
 
 /// <summary>
 /// 

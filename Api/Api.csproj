@@ -31,4 +31,13 @@
       <ProjectReference Include="..\Services\Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\Authentication\HandleEntraGoogleAsync\" />
+      <Folder Include="Services\Authentication\HandleEntraLoginAsync\" />
+      <Folder Include="Services\Authentication\IdentityProviderService\ExchangeGoogleTokenAsync\" />
+      <Folder Include="Services\Authentication\IdentityProviderService\ExchangeMicrosoftTokenAsync\" />
+      <Folder Include="Services\Authentication\TokenService\" />
+      <Folder Include="Services\ResponseService\" />
+    </ItemGroup>
+
 </Project>

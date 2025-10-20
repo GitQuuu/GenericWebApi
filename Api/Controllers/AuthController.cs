@@ -1,6 +1,6 @@
-﻿using Api.Services.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services.Authentication;
 
 namespace Api.Controllers;
 

@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
-namespace Api.Services.IdentityProviderService;
+namespace Services.Authentication.IdentityProviderService.ExchangeMicrosoftTokenAsync;
 
 public partial class IdentityProviderService
 {
@@ -18,11 +19,11 @@ public partial class IdentityProviderService
 		}
 
 		// Optional multi-tenant allowlist guard
-		var allowAll = bool.TryParse(_configuration["Auth:Entra:AllowAllTenants"], out var a) && a;
+		var allowAll = bool.TryParse((string?) _configuration["Auth:Entra:AllowAllTenants"], out var a) && a;
 		if (!allowAll)
 		{
 			var tid = principal.FindFirst("tid")?.Value;
-			var allowed = _configuration.GetSection("Auth:Entra:AllowedTenantIds").Get<string[]>() ?? Array.Empty<string>();
+			var allowed = ConfigurationBinder.Get<string[]>(_configuration.GetSection("Auth:Entra:AllowedTenantIds")) ?? Array.Empty<string>();
 			if (string.IsNullOrEmpty(tid) || !allowed.Contains(tid, StringComparer.OrdinalIgnoreCase))
 			{
 				return new ServiceResult<IdentityUser>(
@@ -60,7 +61,7 @@ public partial class IdentityProviderService
 			var create = await _userManager.CreateAsync(user);
 			if (!create.Succeeded)
 			{
-				var errors = string.Join(", ", create.Errors.Select(e => e.Description));
+				var errors = string.Join(", ", Enumerable.Select<IdentityError, string>(create.Errors, e => e.Description));
 				return new ServiceResult<IdentityUser>(
 													   false,
 													   HttpStatusCode.BadRequest,
@@ -78,7 +79,7 @@ public partial class IdentityProviderService
 
 		// Ensure external login mapping exists
 		var logins = await _userManager.GetLoginsAsync(user);
-		if (!logins.Any(l => l.LoginProvider == "Microsoft" && l.ProviderKey == providerKey))
+		if (!Enumerable.Any<UserLoginInfo>(logins, l => l.LoginProvider == "Microsoft" && l.ProviderKey == providerKey))
 		{
 			await _userManager.AddLoginAsync(user, new UserLoginInfo("Microsoft", providerKey, "Microsoft"));
 		}

@@ -2,15 +2,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Services.Authentication;
+namespace Services.Authentication.HandleEntraGoogleAsync;
 
 public partial class AuthenticationOrchestrator
 {
 	/// <inheritdoc />
-	public async Task<IActionResult> HandleEntraLoginAsync(CancellationToken ctx = default)
+	public async Task<IActionResult> HandleEntraGoogleAsync(CancellationToken ctx = default)
 	{
 		ClaimsPrincipal             principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
-		ServiceResult<IdentityUser> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal, ctx);
+		ServiceResult<IdentityUser> entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal);
 		var                         tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
 
 		return await _responseService.HandleResultAsync(tokenResponse);

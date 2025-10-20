@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Api.Services;
+namespace Services;
 
 public class ServiceResult<T> where T : class?
 {
