@@ -3,7 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
-namespace Services.Authentication.IdentityProviderService.ExchangeMicrosoftTokenAsync;
+namespace Services.Authentication.IdentityProviderService;
 
 public partial class IdentityProviderService
 {

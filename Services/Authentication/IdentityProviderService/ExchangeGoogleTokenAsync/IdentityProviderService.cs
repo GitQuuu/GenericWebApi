@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 
-namespace Services.Authentication.IdentityProviderService.ExchangeGoogleTokenAsync;
+namespace Services.Authentication.IdentityProviderService;
 
 public partial class IdentityProviderService
 {

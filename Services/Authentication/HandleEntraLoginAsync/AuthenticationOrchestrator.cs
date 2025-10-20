@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Services.Authentication.HandleEntraLoginAsync;
+namespace Services.Authentication;
 
 public partial class AuthenticationOrchestrator
 {

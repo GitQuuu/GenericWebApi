@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Services.Authentication.HandleEntraGoogleAsync;
+namespace Services.Authentication;
 
 public partial class AuthenticationOrchestrator
 {

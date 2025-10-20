@@ -11,7 +11,6 @@ using Services.Authentication;
 using Services.Authentication.IdentityProviderService;
 using Services.Authentication.TokenService;
 using Services.ResponseService;
-using IdentityProviderService = Services.Authentication.IdentityProviderService.ExchangeMicrosoftTokenAsync.IdentityProviderService;
 
 var builder = WebApplication.CreateBuilder(args);
 
