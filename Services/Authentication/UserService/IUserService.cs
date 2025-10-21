@@ -57,4 +57,12 @@ public interface IUserService
 	/// <param name="login">The external login information.</param>
 	/// <returns>An IdentityResult indicating success or failure.</returns>
 	Task<IdentityResult> AddLoginAsync(IdentityUser user, UserLoginInfo login);
+
+	/// <summary>
+	/// Validates that the provided password matches the user's stored password.
+	/// </summary>
+	/// <param name="user">The user whose password should be validated.</param>
+	/// <param name="password">The password to validate.</param>
+	/// <returns>True if the password is valid; otherwise, false.</returns>
+	Task<bool> CheckPasswordAsync(IdentityUser user, string password);
 }

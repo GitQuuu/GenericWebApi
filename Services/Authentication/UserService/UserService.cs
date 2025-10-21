@@ -55,4 +55,10 @@ public class UserService : IUserService
 	{
 		return await _userManager.AddLoginAsync(user, login);
 	}
+
+	/// <inheritdoc />
+	public async Task<bool> CheckPasswordAsync(IdentityUser user, string password)
+	{
+		return await _userManager.CheckPasswordAsync(user, password);
+	}
 }
