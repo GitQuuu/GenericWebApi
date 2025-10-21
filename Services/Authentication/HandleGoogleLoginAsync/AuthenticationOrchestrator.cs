@@ -8,17 +8,17 @@ namespace Services.Authentication;
 public partial class AuthenticationOrchestrator
 {
 	/// <inheritdoc />
-	public async Task<IActionResult> HandleEntraGoogleAsync(CancellationToken ctx = default)
+	public async Task<IActionResult> HandleGoogleLoginAsync(CancellationToken ctx = default)
 	{
 		ClaimsPrincipal              principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
-		ServiceResult<IdentityUser>  entraResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal, ctx);
+		ServiceResult<IdentityUser>  googleResponse = await _identityProviderService.ExchangeGoogleTokenAsync(principal, ctx);
 		
-		if (entraResponse.Data is null)
+		if (googleResponse.Data is null)
 		{
-			return await _responseService.HandleResultAsync(entraResponse); 
+			return await _responseService.HandleResultAsync(googleResponse); 
 		}
 		
-		ServiceResult<TokenResponse> tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
+		ServiceResult<TokenResponse> tokenResponse = await _tokenService.CreateForUserAsync(googleResponse.Data);
 
 		return await _responseService.HandleResultAsync(tokenResponse);
 	}

@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Services.Authentication.TokenService;
 
 namespace Services.Authentication;
 
@@ -11,7 +12,13 @@ public partial class AuthenticationOrchestrator
 	{
 		ClaimsPrincipal             principal     = _httpContextAccessor.HttpContext?.User ?? throw new ArgumentNullException(nameof(principal));
 		ServiceResult<IdentityUser> entraResponse = await _identityProviderService.ExchangeMicrosoftTokenAsync(principal, ctx);
-		var                         tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
+		
+		if (entraResponse.Data is null)
+		{
+			return await _responseService.HandleResultAsync(entraResponse); 
+		}
+
+		ServiceResult<TokenResponse> tokenResponse = await _tokenService.CreateForUserAsync(entraResponse.Data);
 
 		return await _responseService.HandleResultAsync(tokenResponse);
 	}

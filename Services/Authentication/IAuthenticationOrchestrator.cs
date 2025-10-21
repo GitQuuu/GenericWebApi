@@ -20,5 +20,5 @@ public interface IAuthenticationOrchestrator
 	/// </summary>
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the login process.</returns>
-	Task<IActionResult> HandleEntraGoogleAsync(CancellationToken ctx = default);
+	Task<IActionResult> HandleGoogleLoginAsync(CancellationToken ctx = default);
 }
