@@ -3,15 +3,17 @@ using Microsoft.AspNetCore.Identity;
 namespace Services.Authentication.UserService;
 
 /// <summary>
-/// Service for managing user operations, abstracting UserManager functionality.
+/// Service for managing user operations, abstracting UserManager and SignInManager functionality.
 /// </summary>
 public class UserService : IUserService
 {
 	private readonly UserManager<IdentityUser> _userManager;
+	private readonly SignInManager<IdentityUser> _signInManager;
 
-	public UserService(UserManager<IdentityUser> userManager)
+	public UserService(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
 	{
 		_userManager = userManager;
+		_signInManager = signInManager;
 	}
 
 	/// <inheritdoc />
@@ -57,8 +59,16 @@ public class UserService : IUserService
 	}
 
 	/// <inheritdoc />
-	public async Task<bool> CheckPasswordAsync(IdentityUser user, string password)
+	public async Task<bool> PasswordSignInAsync(IdentityUser user, string password)
 	{
-		return await _userManager.CheckPasswordAsync(user, password);
+		var result = await _signInManager.PasswordSignInAsync(user, password, false, lockoutOnFailure: false);
+		return result.Succeeded;
+	}
+
+	/// <inheritdoc />
+	public async Task<bool> PasswordSignInAsync(string email, string password)
+	{
+		var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+		return result.Succeeded;
 	}
 }

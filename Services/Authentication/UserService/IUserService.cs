@@ -60,9 +60,19 @@ public interface IUserService
 
 	/// <summary>
 	/// Validates that the provided password matches the user's stored password.
+	/// Uses SignInManager to enforce lockout policies and track failed attempts.
 	/// </summary>
 	/// <param name="user">The user whose password should be validated.</param>
 	/// <param name="password">The password to validate.</param>
-	/// <returns>True if the password is valid; otherwise, false.</returns>
-	Task<bool> CheckPasswordAsync(IdentityUser user, string password);
+	/// <returns>True if the password is valid and the account is not locked out; otherwise, false.</returns>
+	Task<bool> PasswordSignInAsync(IdentityUser user, string password);
+
+	/// <summary>
+	/// Validates credentials using email/username and password.
+	/// Uses SignInManager to enforce lockout policies and track failed attempts.
+	/// </summary>
+	/// <param name="email">The email or username of the user.</param>
+	/// <param name="password">The password to validate.</param>
+	/// <returns>True if the credentials are valid and the account is not locked out; otherwise, false.</returns>
+	Task<bool> PasswordSignInAsync(string email, string password);
 }
