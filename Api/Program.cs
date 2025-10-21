@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Services.Authentication;
 using Services.Authentication.IdentityProviderService;
 using Services.Authentication.TokenService;
+using Services.Authentication.UserService;
 using Services.ResponseService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthenticationOrchestrator, AuthenticationOrchestrator>();
 builder.Services.AddScoped<IIdentityProviderService, IdentityProviderService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResponseService, ResponseService>();
 builder.Services.AddAuthentication(options =>
                {

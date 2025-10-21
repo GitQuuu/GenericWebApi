@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Services.Authentication.UserService;
 
 namespace Services.Authentication.IdentityProviderService;
 
@@ -8,13 +9,13 @@ namespace Services.Authentication.IdentityProviderService;
 /// </summary>
 public partial class IdentityProviderService : IIdentityProviderService
 {
-	private readonly UserManager<IdentityUser> _userManager;
+	private readonly IUserService _userService;
 	private readonly IConfiguration _configuration;
 
-	public IdentityProviderService(UserManager<IdentityUser> userManager,
+	public IdentityProviderService(IUserService userService,
 								   IConfiguration configuration)
 	{
-		_userManager   = userManager;
+		_userService   = userService;
 		_configuration = configuration;
 	}
 }

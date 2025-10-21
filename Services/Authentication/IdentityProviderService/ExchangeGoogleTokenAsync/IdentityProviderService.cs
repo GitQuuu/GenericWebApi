@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 
@@ -31,8 +31,8 @@ public partial class IdentityProviderService
 		}
 
 		// Find or create user
-		var user = await _userManager.FindByLoginAsync("Google", sub)
-				?? await _userManager.FindByEmailAsync(email);
+		var user = await _userService.FindByLoginAsync("Google", sub)
+				?? await _userService.FindByEmailAsync(email);
 
 		if (user is null)
 		{
@@ -42,7 +42,7 @@ public partial class IdentityProviderService
 				Email = email,
 				EmailConfirmed = false,
 			};
-			var create = await _userManager.CreateAsync(user);
+			var create = await _userService.CreateAsync(user);
 			if (!create.Succeeded)
 			{
 				var errors = string.Join(", ", Enumerable.Select<IdentityError, string>(create.Errors, e => e.Description));
@@ -54,9 +54,9 @@ public partial class IdentityProviderService
 		}
 
 		// Link external login if missing
-		var logins = await _userManager.GetLoginsAsync(user);
+		var logins = await _userService.GetLoginsAsync(user);
 		if (!Enumerable.Any<UserLoginInfo>(logins, l => l.LoginProvider == "Google" && l.ProviderKey == sub))
-			await _userManager.AddLoginAsync(user, new UserLoginInfo("Google", sub, "Google"));
+			await _userService.AddLoginAsync(user, new UserLoginInfo("Google", sub, "Google"));
 
 		// Enforce confirmed email
 		if (!user.EmailConfirmed)

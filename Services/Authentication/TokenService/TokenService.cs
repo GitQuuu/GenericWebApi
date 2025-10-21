@@ -1,10 +1,11 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Services.Authentication.UserService;
 
 namespace Services.Authentication.TokenService;
 
@@ -15,13 +16,13 @@ public class TokenService : ITokenService
 {
 	private readonly IConfiguration _cfg;
 	private readonly TimeProvider _timeProvider;
-	private readonly UserManager<IdentityUser> _userManager;
+	private readonly IUserService _userService;
 
-	public TokenService(IConfiguration cfg, TimeProvider timeProvider, UserManager<IdentityUser> userManager)
+	public TokenService(IConfiguration cfg, TimeProvider timeProvider, IUserService userService)
 	{
 		_cfg             = cfg;
 		_timeProvider    = timeProvider;
-		_userManager = userManager;
+		_userService = userService;
 	}
 
 	public async Task<ServiceResult<TokenResponse>> CreateForUserAsync(IdentityUser user)
@@ -42,9 +43,12 @@ public class TokenService : ITokenService
 			new (ClaimTypes.Email, user.Email ?? string.Empty),
 		};
 
-		var identityUser  = await _userManager.FindByIdAsync(user.Id);
-		var roles = await _userManager.GetRolesAsync(identityUser);
-		claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+		var identityUser  = await _userService.FindByIdAsync(user.Id);
+		if (identityUser is not null)
+		{
+			var roles = await _userService.GetRolesAsync(identityUser);
+			claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+		}
 
 		var jwt = new JwtSecurityToken(
 									   issuer : issuer,

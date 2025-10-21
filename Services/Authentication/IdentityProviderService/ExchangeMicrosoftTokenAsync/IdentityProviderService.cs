@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -52,13 +52,13 @@ public partial class IdentityProviderService
 		
 
 		// Upsert/link local user
-		var user = await _userManager.FindByLoginAsync("Microsoft", providerKey)
-				?? await _userManager.FindByEmailAsync(email);
+		var user = await _userService.FindByLoginAsync("Microsoft", providerKey)
+				?? await _userService.FindByEmailAsync(email);
 
 		if (user is null)
 		{
 			user = new IdentityUser() { UserName = email, Email = email, EmailConfirmed = false };
-			var create = await _userManager.CreateAsync(user);
+			var create = await _userService.CreateAsync(user);
 			if (!create.Succeeded)
 			{
 				var errors = string.Join(", ", Enumerable.Select<IdentityError, string>(create.Errors, e => e.Description));
@@ -78,10 +78,10 @@ public partial class IdentityProviderService
 		}
 
 		// Ensure external login mapping exists
-		var logins = await _userManager.GetLoginsAsync(user);
+		var logins = await _userService.GetLoginsAsync(user);
 		if (!Enumerable.Any<UserLoginInfo>(logins, l => l.LoginProvider == "Microsoft" && l.ProviderKey == providerKey))
 		{
-			await _userManager.AddLoginAsync(user, new UserLoginInfo("Microsoft", providerKey, "Microsoft"));
+			await _userService.AddLoginAsync(user, new UserLoginInfo("Microsoft", providerKey, "Microsoft"));
 		}
 
 		return new ServiceResult<IdentityUser>(true,
