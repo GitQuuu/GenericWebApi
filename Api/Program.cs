@@ -130,7 +130,18 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSwaggerGen(options =>
 {
-	options.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
+	options.SwaggerDoc("v1", new()
+	{
+		Title = builder.Configuration["SwaggerUi:Title"],
+		Version = "v1" , 
+		Description = builder.Configuration["SwaggerUi:Description"],
+		Contact = new OpenApiContact()
+		{
+			Email = builder.Configuration["SwaggerUi:Contact:Email"],
+			Name = builder.Configuration["SwaggerUi:Contact:Name"],
+			Url = new Uri(builder.Configuration["SwaggerUi:Contact:Url"] ?? string.Empty),	
+		}
+	});
 
 	// Add XML comments if needed
 	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
