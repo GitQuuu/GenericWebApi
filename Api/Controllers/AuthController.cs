@@ -1,6 +1,6 @@
-﻿using Api.Services.Authentication;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services.Authentication;
 
 namespace Api.Controllers;
 
@@ -61,6 +61,6 @@ public class AuthController : ControllerBase
 	[Authorize(AuthenticationSchemes = "Google")]
 	public async Task<IActionResult> ExchangeGoogle(CancellationToken ct)
 	{
-		return await _orchestrator.HandleEntraGoogleAsync(ct);
+		return await _orchestrator.HandleGoogleLoginAsync(ct);
 	}
 }
