@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Authentication;
 
@@ -21,4 +21,13 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the login process.</returns>
 	Task<IActionResult> HandleGoogleLoginAsync(CancellationToken ctx = default);
+
+	/// <summary>
+	/// Handles the local login flow by validating email and password credentials.
+	/// </summary>
+	/// <param name="email">The user's email address.</param>
+	/// <param name="password">The user's password.</param>
+	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
+	/// <returns>A JWT on success</returns>
+	Task<IActionResult> HandleLocalLoginAsync(string email, string password, CancellationToken ctx = default);
 }

@@ -12,7 +12,7 @@ public class UserService : IUserService
 
 	public UserService(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
 	{
-		_userManager = userManager;
+		_userManager   = userManager;
 		_signInManager = signInManager;
 	}
 
@@ -61,14 +61,14 @@ public class UserService : IUserService
 	/// <inheritdoc />
 	public async Task<bool> PasswordSignInAsync(IdentityUser user, string password)
 	{
-		var result = await _signInManager.PasswordSignInAsync(user, password, false, lockoutOnFailure: false);
+		var result = await _signInManager.PasswordSignInAsync(user, password, false, lockoutOnFailure : false);
 		return result.Succeeded;
 	}
 
 	/// <inheritdoc />
 	public async Task<bool> PasswordSignInAsync(string email, string password)
 	{
-		var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+		var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent : false, lockoutOnFailure : false);
 		return result.Succeeded;
 	}
 }
