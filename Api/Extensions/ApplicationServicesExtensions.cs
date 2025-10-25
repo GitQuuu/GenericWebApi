@@ -12,6 +12,7 @@ using Services.Authentication;
 using Services.Authentication.IdentityProviderService;
 using Services.Authentication.TokenService;
 using Services.Authentication.UserService;
+using Services.EmailService;
 using Services.ResponseService;
 
 namespace Api.Extensions;
@@ -212,5 +213,8 @@ public static class ApplicationServicesExtensions
 		
 		// Response service
 		services.AddScoped<IResponseService, ResponseService>();
+		
+		// Email service
+		services.AddScoped<IEmailService, EmailService>();
 	}
 }

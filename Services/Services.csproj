@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
@@ -9,6 +9,10 @@
     <ItemGroup>
       <ProjectReference Include="..\DAL\DAL.csproj" />
       <ProjectReference Include="..\Dependencies\Dependencies.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MailKit" Version="4.3.0" />
     </ItemGroup>
 
 </Project>
