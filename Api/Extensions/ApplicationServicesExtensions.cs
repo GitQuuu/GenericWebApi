@@ -1,4 +1,13 @@
+using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using DAL;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Services.Authentication;
 using Services.Authentication.IdentityProviderService;
 using Services.Authentication.TokenService;
@@ -9,6 +18,190 @@ namespace Api.Extensions;
 
 public static class ApplicationServicesExtensions
 {
+	/// <summary>
+	/// Configures database and Entity Framework
+	/// </summary>
+	public static void AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
+	{
+		var connectionString = configuration.GetConnectionString("DefaultConnection") 
+			?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+		
+		services.AddDbContext<ApplicationDbContext>(options =>
+			options.UseSqlite(connectionString));
+		
+		services.AddDatabaseDeveloperPageExceptionFilter();
+	}
+	
+	/// <summary>
+	/// Configures ASP.NET Core Identity
+	/// </summary>
+	public static void AddIdentityConfiguration(this IServiceCollection services)
+	{
+		services.AddDefaultIdentity<IdentityUser>(options => 
+				options.SignIn.RequireConfirmedAccount = true)
+			.AddRoles<IdentityRole>()
+			.AddEntityFrameworkStores<ApplicationDbContext>()
+			.AddDefaultTokenProviders();
+	}
+	
+	/// <summary>
+	/// Configures JWT authentication with multiple schemes (Local, Entra, Google)
+	/// </summary>
+	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			.AddLocalJwtBearer(configuration)
+			.AddEntraJwtBearer(configuration)
+			.AddGoogleJwtBearer(configuration);
+	}
+	
+	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)
+	{
+		return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+		{
+			options.RequireHttpsMetadata = true;
+			options.SaveToken = true;
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidIssuer = configuration["Auth:Local:Issuer"],
+				ValidateAudience = true,
+				ValidAudience = configuration["Auth:Local:Audience"],
+				ValidateLifetime = true,
+				ValidateIssuerSigningKey = true,
+				IssuerSigningKey = new SymmetricSecurityKey(
+					Encoding.UTF8.GetBytes(configuration["Auth:Local:SigningKey"]!)),
+				ClockSkew = TimeSpan.FromMinutes(3),
+				NameClaimType = ClaimTypes.Name,
+				RoleClaimType = ClaimTypes.Role,
+			};
+		});
+	}
+	
+	private static AuthenticationBuilder AddEntraJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)
+	{
+		return builder.AddJwtBearer("Entra", options =>
+		{
+			options.Authority = configuration["Auth:Entra:Authority"];
+			options.Audience = configuration["Auth:Entra:Audience"];
+			
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = false,
+				NameClaimType = "email",
+			};
+			
+			options.Events = new JwtBearerEvents
+			{
+				OnTokenValidated = ctx =>
+				{
+					var requiredTid = configuration["Auth:Entra:TenantId"];
+					if (!string.IsNullOrEmpty(requiredTid))
+					{
+						var tid = ctx.Principal?.FindFirst("tid")?.Value;
+						if (!string.Equals(tid, requiredTid, StringComparison.OrdinalIgnoreCase))
+							ctx.Fail("Invalid tenant.");
+					}
+					
+					return Task.CompletedTask;
+				}
+			};
+		});
+	}
+	
+	private static AuthenticationBuilder AddGoogleJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)
+	{
+		return builder.AddJwtBearer("Google", options =>
+		{
+			options.Authority = "https://accounts.google.com";
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidIssuers = new[]
+				{
+					"https://accounts.google.com",
+					"accounts.google.com"
+				},
+				ValidateAudience = true,
+				ValidAudience = configuration["Auth:Google:ClientId"],
+				ValidateLifetime = true,
+				NameClaimType = "email",
+				RoleClaimType = "roles"
+			};
+			
+			options.Events = new JwtBearerEvents
+			{
+				OnChallenge = ctx =>
+				{
+					ctx.HandleResponse();
+					ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+					return Task.CompletedTask;
+				}
+			};
+		});
+	}
+	
+	/// <summary>
+	/// Configures Swagger/OpenAPI documentation
+	/// </summary>
+	public static void AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddEndpointsApiExplorer();
+		
+		services.AddSwaggerGen(options =>
+		{
+			options.SwaggerDoc("v1", new OpenApiInfo
+			{
+				Title = configuration["SwaggerUi:Title"],
+				Version = "v1",
+				Description = configuration["SwaggerUi:Description"],
+				Contact = new OpenApiContact
+				{
+					Email = configuration["SwaggerUi:Contact:Email"],
+					Name = configuration["SwaggerUi:Contact:Name"],
+					Url = new Uri(configuration["SwaggerUi:Contact:Url"] ?? string.Empty),
+				}
+			});
+			
+			// Add XML comments if needed
+			var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+			var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+			options.IncludeXmlComments(xmlPath);
+			
+			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+			{
+				Name = "Authorization",
+				Type = SecuritySchemeType.ApiKey,
+				Scheme = "Bearer",
+				BearerFormat = "JWT",
+				In = ParameterLocation.Header,
+				Description = "Enter 'Bearer' [space] and then your token.",
+			});
+			
+			options.AddSecurityRequirement(new OpenApiSecurityRequirement
+			{
+				{
+					new OpenApiSecurityScheme
+					{
+						Reference = new OpenApiReference
+						{
+							Type = ReferenceType.SecurityScheme,
+							Id = "Bearer"
+						}
+					},
+					Array.Empty<string>()
+				}
+			});
+		});
+	}
+	
+	/// <summary>
+	/// Registers application services
+	/// </summary>
 	public static void AddApplicationServices(this IServiceCollection services)
 	{
 		// Authentication services
