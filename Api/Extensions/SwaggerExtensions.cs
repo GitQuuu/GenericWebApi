@@ -5,7 +5,7 @@ namespace Api.Extensions;
 
 public static class SwaggerExtensions
 {
-	public static IServiceCollection AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
+	public static void AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddEndpointsApiExplorer();
 		
@@ -54,11 +54,9 @@ public static class SwaggerExtensions
 				}
 			});
 		});
-		
-		return services;
 	}
 	
-	public static IApplicationBuilder UseSwaggerConfiguration(this WebApplication app)
+	public static void UseSwaggerConfiguration(this WebApplication app)
 	{
 		if (app.Environment.IsDevelopment())
 		{
@@ -69,7 +67,5 @@ public static class SwaggerExtensions
 				options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 			});
 		}
-		
-		return app;
 	}
 }

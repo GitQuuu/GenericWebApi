@@ -9,7 +9,7 @@ namespace Api.Extensions;
 
 public static class ApplicationServicesExtensions
 {
-	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+	public static void AddApplicationServices(this IServiceCollection services)
 	{
 		// Authentication services
 		services.AddScoped<IAuthenticationOrchestrator, AuthenticationOrchestrator>();
@@ -19,7 +19,5 @@ public static class ApplicationServicesExtensions
 		
 		// Response service
 		services.AddScoped<IResponseService, ResponseService>();
-		
-		return services;
 	}
 }

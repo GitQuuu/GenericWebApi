@@ -8,7 +8,7 @@ namespace Api.Extensions;
 
 public static class AuthenticationExtensions
 {
-	public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddAuthentication(options =>
 			{
@@ -18,8 +18,6 @@ public static class AuthenticationExtensions
 			.AddLocalJwtBearer(configuration)
 			.AddEntraJwtBearer(configuration)
 			.AddGoogleJwtBearer(configuration);
-		
-		return services;
 	}
 	
 	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)

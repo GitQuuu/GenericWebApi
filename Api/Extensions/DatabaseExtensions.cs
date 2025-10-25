@@ -6,7 +6,7 @@ namespace Api.Extensions;
 
 public static class DatabaseExtensions
 {
-	public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
+	public static void AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
 	{
 		var connectionString = configuration.GetConnectionString("DefaultConnection") 
 			?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -15,19 +15,15 @@ public static class DatabaseExtensions
 			options.UseSqlite(connectionString));
 		
 		services.AddDatabaseDeveloperPageExceptionFilter();
-		
-		return services;
 	}
 	
-	public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services)
+	public static void AddIdentityConfiguration(this IServiceCollection services)
 	{
 		services.AddDefaultIdentity<IdentityUser>(options => 
 				options.SignIn.RequireConfirmedAccount = true)
 			.AddRoles<IdentityRole>()
 			.AddEntityFrameworkStores<ApplicationDbContext>()
 			.AddDefaultTokenProviders();
-		
-		return services;
 	}
 	
 	public static async Task SeedDatabaseAsync(this WebApplication app)
