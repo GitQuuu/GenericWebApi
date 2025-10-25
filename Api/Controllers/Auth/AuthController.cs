@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.Authentication;
 
-namespace Api.Controllers;
+namespace Api.Controllers.Auth;
 
 /// <summary>
 /// Endpoints for authentication and authorization.

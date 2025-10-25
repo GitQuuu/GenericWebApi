@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Api.Controllers;
+namespace Api.Controllers.Home;
 
 [ApiController]
 [Route("api/[controller]")]
