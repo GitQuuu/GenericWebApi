@@ -75,4 +75,27 @@ public interface IUserService
 	/// <param name="password">The password to validate.</param>
 	/// <returns>True if the credentials are valid and the account is not locked out; otherwise, false.</returns>
 	Task<bool> PasswordSignInAsync(string email, string password);
+
+	/// <summary>
+	/// Creates a new user with the specified email and password.
+	/// </summary>
+	/// <param name="email">The email address for the new user.</param>
+	/// <param name="password">The password for the new user.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> CreateUserAsync(string email, string password);
+
+	/// <summary>
+	/// Generates an email confirmation token for the specified user.
+	/// </summary>
+	/// <param name="user">The user to generate the token for.</param>
+	/// <returns>The email confirmation token.</returns>
+	Task<string> GenerateEmailConfirmationTokenAsync(IdentityUser user);
+
+	/// <summary>
+	/// Confirms a user's email address using the provided token.
+	/// </summary>
+	/// <param name="user">The user whose email should be confirmed.</param>
+	/// <param name="token">The email confirmation token.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> ConfirmEmailAsync(IdentityUser user, string token);
 }

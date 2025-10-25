@@ -71,4 +71,27 @@ public class UserService : IUserService
 		var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent : false, lockoutOnFailure : false);
 		return result.Succeeded;
 	}
+
+	/// <inheritdoc />
+	public async Task<IdentityResult> CreateUserAsync(string email, string password)
+	{
+		var user = new IdentityUser
+		{
+			UserName = email,
+			Email = email
+		};
+		return await _userManager.CreateAsync(user, password);
+	}
+
+	/// <inheritdoc />
+	public async Task<string> GenerateEmailConfirmationTokenAsync(IdentityUser user)
+	{
+		return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+	}
+
+	/// <inheritdoc />
+	public async Task<IdentityResult> ConfirmEmailAsync(IdentityUser user, string token)
+	{
+		return await _userManager.ConfirmEmailAsync(user, token);
+	}
 }
