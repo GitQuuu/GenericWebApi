@@ -15,6 +15,6 @@ public partial class EmailService
 	/// <returns>True if email was sent successfully, false otherwise</returns>
 	public async Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = true)
 	{
-		return await SendEmailAsync(new[] { to }, subject, body, isHtml);
+		return await SendEmailAsync([to], subject, body, isHtml);
 	}
 }
