@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Services.Authentication.IdentityProviderService;
 using Services.Authentication.TokenService;
 using Services.Authentication.UserService;
@@ -18,13 +19,15 @@ public partial class AuthenticationOrchestrator : IAuthenticationOrchestrator
 	private readonly IResponseService _responseService;
 	private readonly IUserService _userService;
 	private readonly IEmailService _emailService;
+	private readonly IConfiguration _configuration;
 
 	public AuthenticationOrchestrator(IIdentityProviderService identityProviderService,
 									  ITokenService tokenService,
 									  IHttpContextAccessor httpContextAccessor,
 									  IResponseService responseService,
 									  IUserService userService,
-									  IEmailService emailService)
+									  IEmailService emailService,
+									  IConfiguration configuration)
 	{
 		_identityProviderService = identityProviderService;
 		_tokenService            = tokenService;
@@ -32,5 +35,6 @@ public partial class AuthenticationOrchestrator : IAuthenticationOrchestrator
 		_responseService         = responseService;
 		_userService             = userService;
 		_emailService            = emailService;
+		_configuration           = configuration;
 	}
 }

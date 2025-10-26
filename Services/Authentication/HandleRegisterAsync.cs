@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 
 namespace Services.Authentication;
 
@@ -33,37 +34,59 @@ public partial class AuthenticationOrchestrator
 				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "User created but could not be retrieved"));
 		}
 
-		// Generate email confirmation token
-		var token = await _userService.GenerateEmailConfirmationTokenAsync(user);
-		
-		// Encode the token for URL
-		var encodedToken = WebUtility.UrlEncode(token);
+		// Get user activation mode: "SelfActivation", "AdminApproval", or "AutoActivation"
+		var activationMode = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
 
-		// Build the callback URL
-		var request = _httpContextAccessor.HttpContext?.Request;
-		var callbackUrl = $"{request?.Scheme}://{request?.Host}/api/Auth/ActivateUser?userId={user.Id}&token={encodedToken}";
-
-		// Send confirmation email
-		var emailSubject = "Confirm your email";
-		var emailBody = $@"
-			<h2>Welcome to our platform!</h2>
-			<p>Please confirm your email address by clicking the link below:</p>
-			<p><a href='{callbackUrl}'>Activate Your Account</a></p>
-			<p>If you didn't create this account, please ignore this email.</p>
-		";
-
-		var emailSent = await _emailService.SendEmailAsync(email, emailSubject, emailBody, true);
-		
-		if (!emailSent)
+		switch (activationMode)
 		{
-			// Rollback: Delete the user since email couldn't be sent
-			await _userService.DeleteAsync(user);
-			
-			return await _responseService.HandleResultAsync(
-				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "Registration failed. Unable to send confirmation email. Please try again later."));
-		}
+			case "AutoActivation":
+				// Auto-confirm the user's email - no email sent, user can immediately log in
+				var autoToken = await _userService.GenerateEmailConfirmationTokenAsync(user);
+				await _userService.ConfirmEmailAsync(user, autoToken);
+				
+				return await _responseService.HandleResultAsync(
+					new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. You can now log in."));
 
-		return await _responseService.HandleResultAsync(
-			new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. Please check your email to activate your account."));
+			case "AdminApproval":
+				// User created but not confirmed - admin must manually activate, no email sent
+				return await _responseService.HandleResultAsync(
+					new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. Your account is pending admin approval."));
+
+			case "SelfActivation":
+			default:
+				// User must confirm via email link
+				// Generate email confirmation token
+				var confirmationToken = await _userService.GenerateEmailConfirmationTokenAsync(user);
+				
+				// Encode the token for URL
+				var encodedToken = WebUtility.UrlEncode(confirmationToken);
+
+				// Build the callback URL
+				var request = _httpContextAccessor.HttpContext?.Request;
+				var callbackUrl = $"{request?.Scheme}://{request?.Host}/api/Auth/ActivateUser?userId={user.Id}&token={encodedToken}";
+
+				// Send confirmation email
+				var emailSubject = "Confirm your email";
+				var emailBody = $@"
+					<h2>Welcome to our platform!</h2>
+					<p>Please confirm your email address by clicking the link below:</p>
+					<p><a href='{callbackUrl}'>Activate Your Account</a></p>
+					<p>If you didn't create this account, please ignore this email.</p>
+				";
+
+				var emailSent = await _emailService.SendEmailAsync(email, emailSubject, emailBody, true);
+				
+				if (!emailSent)
+				{
+					// Rollback: Delete the user since email couldn't be sent
+					await _userService.DeleteAsync(user);
+					
+					return await _responseService.HandleResultAsync(
+						new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "Registration failed. Unable to send confirmation email. Please try again later."));
+				}
+
+				return await _responseService.HandleResultAsync(
+					new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. Please check your email to activate your account."));
+		}
 	}
 }
