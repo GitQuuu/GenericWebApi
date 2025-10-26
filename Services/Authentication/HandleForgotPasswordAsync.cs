@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Net;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Authentication;
@@ -20,7 +21,15 @@ public partial class AuthenticationOrchestrator
 		var resetLink = $"{request?.Scheme}://{request?.Host}/api/Auth/reset-password?userId={forgotPasswordResult.Data.Item1.Id}&token={Uri.EscapeDataString(forgotPasswordResult.Data.Item2)}";
 	
 		// Send email with reset link
-		await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink, ct);
+		var sendEmailResult = await _emailService.SendEmailAsync(forgotPasswordResult.Data.Item1.Email,"Activation link" ,resetLink, true);
+		
+		if (sendEmailResult is false)
+		{
+			return await _responseService.HandleResultAsync(
+				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "Failed to send reset link email."));
+		}
+		
+		return new OkResult();
 	}
     
 }
