@@ -37,7 +37,7 @@ public partial class AuthenticationOrchestrator
 		// Get user activation mode: "SelfActivation", "AdminApproval", or "AutoActivation"
 		var activationMode = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
 
-		switch (activationMode)
+		switch (UserActivationModeEnum)
 		{
 			case "AutoActivation":
 				// Auto-confirm the user's email - no email sent, user can immediately log in
