@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Authentication.UserService;
 
@@ -105,4 +106,12 @@ public interface IUserService
 	/// <param name="user">The user to delete.</param>
 	/// <returns>An IdentityResult indicating success or failure.</returns>
 	Task<IdentityResult> DeleteAsync(IdentityUser user);
+
+	/// <summary>
+	/// Handles the process of initiating a password reset for a user.
+	/// </summary>
+	/// <param name="email">The email address of the user requesting the password reset.</param>
+	/// <param name="ct">The cancellation token to monitor for cancellation requests.</param>
+	/// <returns>An IActionResult indicating the outcome of the password reset initiation.</returns>
+	Task<ServiceResult<Tuple<IdentityUser, string>>> ForgotPasswordAsync(string email, CancellationToken ct);
 }
