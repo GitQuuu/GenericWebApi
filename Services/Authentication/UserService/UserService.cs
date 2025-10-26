@@ -94,4 +94,10 @@ public class UserService : IUserService
 	{
 		return await _userManager.ConfirmEmailAsync(user, token);
 	}
+
+	/// <inheritdoc />
+	public async Task<IdentityResult> DeleteAsync(IdentityUser user)
+	{
+		return await _userManager.DeleteAsync(user);
+	}
 }

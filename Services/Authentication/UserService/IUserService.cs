@@ -98,4 +98,11 @@ public interface IUserService
 	/// <param name="token">The email confirmation token.</param>
 	/// <returns>An IdentityResult indicating success or failure.</returns>
 	Task<IdentityResult> ConfirmEmailAsync(IdentityUser user, string token);
+
+	/// <summary>
+	/// Deletes a user from the system.
+	/// </summary>
+	/// <param name="user">The user to delete.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> DeleteAsync(IdentityUser user);
 }
