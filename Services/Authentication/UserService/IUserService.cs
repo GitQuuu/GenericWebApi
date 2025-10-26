@@ -114,4 +114,15 @@ public interface IUserService
 	/// <param name="ct">The cancellation token to monitor for cancellation requests.</param>
 	/// <returns>An IActionResult indicating the outcome of the password reset initiation.</returns>
 	Task<ServiceResult<Tuple<IdentityUser, string>>> ForgotPasswordAsync(string email, CancellationToken ct);
+
+	/// <summary>
+	/// Resets a user's password using the provided reset token and new password.
+	/// </summary>
+	/// <typeparam name="T">The type of result expected from the operation.</typeparam>
+	/// <param name="userId">The unique identifier of the user whose password is to be reset.</param>
+	/// <param name="decodedToken">The decoded reset token for the password reset process.</param>
+	/// <param name="requestNewPassword">The new password to be set for the user.</param>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult object that contains the result of the password reset operation.</returns>
+	Task<ServiceResult<IdentityResult>> ResetPasswordAsync(string userId, string decodedToken, string requestNewPassword, CancellationToken ct);
 }
