@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,8 +47,8 @@ public class HomeController : ControllerBase
 	/// </summary>
 	/// <param name="loginRequest">The login request containing username and password.</param>
 	/// <returns>A JWT token if authentication is successful.</returns>
-	[HttpPost("Login")]
-	public IActionResult Login([FromBody] LoginRequest loginRequest)
+	[HttpPost("Login2")]
+	public IActionResult Login([FromBody] TestLoginRequest loginRequest)
 	{
 		var userManager = HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
 		var user = userManager.FindByEmailAsync(loginRequest.Email).Result;
@@ -83,6 +82,9 @@ public class HomeController : ControllerBase
 
 		return new JwtSecurityTokenHandler().WriteToken(token);
 	}
-
-	
 }
+
+/// <summary>
+/// Request model for test login endpoint.
+/// </summary>
+public record TestLoginRequest(string Email, string Password);

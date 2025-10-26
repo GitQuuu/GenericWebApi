@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Auth;
@@ -7,7 +8,20 @@ public partial class AuthController
 	/// <summary>
 	/// Request model for user registration.
 	/// </summary>
-	public record RegisterRequest(string Email, string Password);
+	public record RegisterRequest
+	{
+		[Required]
+		[EmailAddress]
+		public required string Email { get; init; }
+		
+		[Required]
+		[MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
+		public required string Password { get; init; }
+		
+		[Required]
+		[Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
+		public required string ConfirmPassword { get; init; }
+	}
 
 	/// <summary>
 	/// Registers a new user account with email and password.
