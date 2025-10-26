@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.Extensions.Configuration;
+using Services.Authentication.HandleRegisterAsync;
 
 namespace Services.Authentication;
 
@@ -35,11 +36,14 @@ public partial class AuthenticationOrchestrator
 		}
 
 		// Get user activation mode: "SelfActivation", "AdminApproval", or "AutoActivation"
-		var activationMode = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
+		var activationModeString = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
+		var activationMode = Enum.TryParse<UserActivationModeEnum>(activationModeString, true, out var parsedMode)
+			? parsedMode
+			: UserActivationModeEnum.AdminApproval;
 
-		switch (UserActivationModeEnum)
+		switch (activationMode)
 		{
-			case "AutoActivation":
+			case UserActivationModeEnum.AutoActivation:
 				// Auto-confirm the user's email - no email sent, user can immediately log in
 				var autoToken = await _userService.GenerateEmailConfirmationTokenAsync(user);
 				await _userService.ConfirmEmailAsync(user, autoToken);
@@ -47,12 +51,12 @@ public partial class AuthenticationOrchestrator
 				return await _responseService.HandleResultAsync(
 					new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. You can now log in."));
 
-			case "AdminApproval":
+			case UserActivationModeEnum.AdminApproval:
 				// User created but not confirmed - admin must manually activate, no email sent
 				return await _responseService.HandleResultAsync(
 					new ServiceResult<string>(true, HttpStatusCode.Created, "Registration successful. Your account is pending admin approval."));
 
-			case "SelfActivation":
+			case UserActivationModeEnum.SelfActivation:
 			default:
 				// User must confirm via email link
 				// Generate email confirmation token
