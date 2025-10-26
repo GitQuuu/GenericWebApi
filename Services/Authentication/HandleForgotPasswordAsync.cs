@@ -18,7 +18,7 @@ public partial class AuthenticationOrchestrator
 		var request     = _httpContextAccessor.HttpContext?.Request;
 		
 		// Create reset link (adjust the URL based on your frontend)
-		var callbackUrl = $"{request?.Scheme}://{request?.Host}/api/Auth/reset-password?userId={forgotPasswordResult.Data.Item1.Id}&token={Uri.EscapeDataString(forgotPasswordResult.Data.Item2)}";
+		var callbackUrl = $"{request?.Scheme}://{request?.Host}/api/Auth/ResetPassword?userId={forgotPasswordResult.Data.Item1.Id}&token={Uri.EscapeDataString(forgotPasswordResult.Data.Item2)}";
 		
 		// Send confirmation email
 		var emailSubject = "Confirm your email";
