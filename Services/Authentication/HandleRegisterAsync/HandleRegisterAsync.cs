@@ -36,8 +36,8 @@ public partial class AuthenticationOrchestrator
 		}
 
 		// Get user activation mode: "SelfActivation", "AdminApproval", or "AutoActivation"
-		var activationModeString = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
-		var activationMode = Enum.TryParse<UserActivationModeEnum>(activationModeString, true, out var parsedMode)
+		string activationModeString = _configuration.GetValue<string>("Auth:Local:UserActivationMode", "SelfActivation");
+		UserActivationModeEnum activationMode = Enum.TryParse<UserActivationModeEnum>(activationModeString, true, out var parsedMode)
 			? parsedMode
 			: UserActivationModeEnum.AdminApproval;
 
