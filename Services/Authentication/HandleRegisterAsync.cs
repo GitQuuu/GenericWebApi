@@ -52,12 +52,15 @@ public partial class AuthenticationOrchestrator
 			<p>If you didn't create this account, please ignore this email.</p>
 		";
 
-		var emailSent = await _emailService.SendEmailAsync(email, emailSubject, emailBody,true);
+		var emailSent = await _emailService.SendEmailAsync(email, emailSubject, emailBody, true);
 		
 		if (!emailSent)
 		{
+			// Rollback: Delete the user since email couldn't be sent
+			await _userService.DeleteAsync(user);
+			
 			return await _responseService.HandleResultAsync(
-				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "User created but confirmation email could not be sent"));
+				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "Registration failed. Unable to send confirmation email. Please try again later."));
 		}
 
 		return await _responseService.HandleResultAsync(
