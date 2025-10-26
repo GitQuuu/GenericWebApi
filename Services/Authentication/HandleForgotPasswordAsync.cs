@@ -18,10 +18,19 @@ public partial class AuthenticationOrchestrator
 		var request     = _httpContextAccessor.HttpContext?.Request;
 		
 		// Create reset link (adjust the URL based on your frontend)
-		var resetLink = $"{request?.Scheme}://{request?.Host}/api/Auth/reset-password?userId={forgotPasswordResult.Data.Item1.Id}&token={Uri.EscapeDataString(forgotPasswordResult.Data.Item2)}";
-	
+		var callbackUrl = $"{request?.Scheme}://{request?.Host}/api/Auth/reset-password?userId={forgotPasswordResult.Data.Item1.Id}&token={Uri.EscapeDataString(forgotPasswordResult.Data.Item2)}";
+		
+		// Send confirmation email
+		var emailSubject = "Confirm your email";
+		var emailBody = $@"
+					<h2>Click link to reset password!</h2>
+					<p>Please reset your password by clicking the link below:</p>
+					<p><a href='{callbackUrl}'>Activate Your Account</a></p>
+					<p>If you didn't request this, please change your password.</p>
+				";
+		
 		// Send email with reset link
-		var sendEmailResult = await _emailService.SendEmailAsync(forgotPasswordResult.Data.Item1.Email,"Activation link" ,resetLink, true);
+		var sendEmailResult = await _emailService.SendEmailAsync(forgotPasswordResult.Data.Item1.Email,emailSubject ,emailBody, true);
 		
 		if (sendEmailResult is false)
 		{
