@@ -1,7 +1,9 @@
+using Api.Configuration;
 using Api.Extensions;
 using DAL;
 
 var builder = WebApplication.CreateBuilder(args);
+MapsterConfiguration.Configure();
 
 // Configure services
 builder.Services.AddControllers();
