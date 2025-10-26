@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using Services.Authentication;
 
 namespace Api.Controllers.Auth;
 
@@ -44,7 +46,11 @@ public partial class AuthController
 		[FromBody] ResetPasswordRequest request,
 		CancellationToken ct)
 	{
-		return await _orchestrator.HandleResetPasswordAsync(userId, token, request, ct);
+		return await _orchestrator.HandleResetPasswordAsync(
+															userId, 
+															token, 
+															request.Adapt<AuthenticationOrchestrator.ResetPasswordRequestDto>(),
+															ct);
 	}
 }
 
