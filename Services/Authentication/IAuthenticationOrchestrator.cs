@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Authentication;
@@ -63,5 +62,5 @@ public interface IAuthenticationOrchestrator
 	/// <param name="request">The request containing the new password details.</param>
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password reset process.</returns>
-	Task<IActionResult> HandleResetPasswordAsync(string userId, string token, ResetPasswordRequest request, CancellationToken ct);
+	Task<IActionResult> HandleResetPasswordAsync(string userId, string token, AuthenticationOrchestrator.ResetPasswordRequestDto request, CancellationToken ct);
 }
