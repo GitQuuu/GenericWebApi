@@ -48,4 +48,9 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the activation process.</returns>
 	Task<IActionResult> HandleActivateUserAsync(string userId, string token, CancellationToken ctx = default);
+	
+	/// <summary>
+	/// Handles the forgot password process.
+	/// </summary>
+	Task<IActionResult> HandleForgotPasswordAsync(string email, CancellationToken ct);
 }
