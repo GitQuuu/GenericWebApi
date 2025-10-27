@@ -132,4 +132,14 @@ public interface IUserService
 	/// <param name="user">The user to check.</param>
 	/// <returns>True if the email is confirmed; otherwise, false.</returns>
 	Task<bool> IsEmailConfirmedAsync(IdentityUser user);
+
+	/// <summary>
+	/// Changes a user's password after verifying the current password.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user whose password is to be changed.</param>
+	/// <param name="currentPassword">The user's current password for verification.</param>
+	/// <param name="newPassword">The new password to be set for the user.</param>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult object that contains the result of the password change operation.</returns>
+	Task<ServiceResult<IdentityResult>> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken ct);
 }

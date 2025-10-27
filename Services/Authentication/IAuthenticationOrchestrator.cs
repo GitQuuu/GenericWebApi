@@ -74,12 +74,19 @@ public interface IAuthenticationOrchestrator
 	Task<IActionResult> HandleResendActivationMailAsync(string email, CancellationToken ctx = default);
 
 	/// <summary>
-	/// Handles the password reset process by verifying the reset token and updating the user's password.
+	/// Handles the deletion of a user account.
 	/// </summary>
-	/// <param name="request">The unique identifier of the user requesting the password reset.</param>
+	/// <param name="request">The unique identifier of the user requesting the account deletion.</param>
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
-	/// <param name="token">The password reset token to verify.</param>
-	/// <param name="request">The reset password request containing the new password.</param>
-	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password reset process.</returns>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the deletion process.</returns>
 	Task<IActionResult> HandleDeleteUserAsync(AuthenticationOrchestrator.DeleteUserRequestDto request, CancellationToken ctx = default);
+
+	/// <summary>
+	/// Handles the password change process by verifying the current password and updating to a new password.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user requesting the password change.</param>
+	/// <param name="request">The request containing the current and new password details.</param>
+	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password change process.</returns>
+	Task<IActionResult> HandleChangePasswordAsync(string userId, AuthenticationOrchestrator.ChangePasswordRequestDto request, CancellationToken ct);
 }
