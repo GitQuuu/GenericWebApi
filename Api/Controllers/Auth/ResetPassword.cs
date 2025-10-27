@@ -39,11 +39,11 @@ public partial class AuthController
 	/// <para>Query parameters (userId, token) come from the email callback URL.</para>
 	/// </remarks>
 	/// <returns>An IActionResult indicating success or failure of the password reset.</returns>
-	[HttpPost("ResetPassword")]
+	[HttpGet("ResetPassword")]
 	public async Task<IActionResult> ResetPassword(
 		[FromQuery] string userId,
 		[FromQuery] string token,
-		[FromBody] ResetPasswordRequest request,
+		[FromForm] ResetPasswordRequest request,
 		CancellationToken ct)
 	{
 		return await _orchestrator.HandleResetPasswordAsync(

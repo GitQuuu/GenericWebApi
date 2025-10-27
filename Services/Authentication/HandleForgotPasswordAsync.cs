@@ -37,8 +37,8 @@ public partial class AuthenticationOrchestrator
 			return await _responseService.HandleResultAsync(
 				new ServiceResult<string>(false, HttpStatusCode.InternalServerError, "Failed to send reset link email."));
 		}
-		
-		return new OkResult();
+	
+		return await _responseService.HandleResultAsync(new ServiceResult<Tuple<IdentityUser, string>>(true, HttpStatusCode.OK, "If the email exists, a password reset link has been sent."));
 	}
     
 }
