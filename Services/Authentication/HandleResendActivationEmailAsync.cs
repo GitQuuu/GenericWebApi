@@ -18,7 +18,7 @@ public partial class AuthenticationOrchestrator
 
 		// Check if email is already confirmed
 		var isEmailConfirmed = await _userService.IsEmailConfirmedAsync(user);
-		if (isEmailConfirmed is false)
+		if (isEmailConfirmed)
 		{
 			return await _responseService.HandleResultAsync(
 				new ServiceResult<string>(false, HttpStatusCode.BadRequest, "If account exist a activation email will be sent. Please check your email."));
