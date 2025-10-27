@@ -64,7 +64,7 @@ public static class ApplicationServicesExtensions
 	{
 		return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 		{
-			options.RequireHttpsMetadata = true;
+			options.RequireHttpsMetadata = false; // Allow HTTP for development
 			options.SaveToken = true;
 			options.TokenValidationParameters = new TokenValidationParameters
 			{
@@ -79,6 +79,26 @@ public static class ApplicationServicesExtensions
 				ClockSkew = TimeSpan.FromMinutes(3),
 				NameClaimType = ClaimTypes.Name,
 				RoleClaimType = ClaimTypes.Role,
+			};
+			
+			// Add event handlers for debugging
+			options.Events = new JwtBearerEvents
+			{
+				OnAuthenticationFailed = context =>
+				{
+					Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+					return Task.CompletedTask;
+				},
+				OnTokenValidated = context =>
+				{
+					Console.WriteLine("Token validated successfully");
+					return Task.CompletedTask;
+				},
+				OnChallenge = context =>
+				{
+					Console.WriteLine($"OnChallenge: {context.Error}, {context.ErrorDescription}");
+					return Task.CompletedTask;
+				}
 			};
 		});
 	}
