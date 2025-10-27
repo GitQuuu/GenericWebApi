@@ -63,4 +63,12 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password reset process.</returns>
 	Task<IActionResult> HandleResetPasswordAsync(string userId, string token, AuthenticationOrchestrator.ResetPasswordRequestDto request, CancellationToken ct);
+	
+	/// <summary>
+	/// Handles resending the activation email to a user.
+	/// </summary>
+	/// <param name="email">The email address of the user.</param>
+	/// <param name="ctx">The cancellation token to monitor for cancellation requests.</param>
+	/// <returns>An IActionResult indicating the outcome of the resend operation.</returns>
+	Task<IActionResult> HandleResendActivationMailAsync(string email, CancellationToken ctx = default);
 }

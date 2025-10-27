@@ -125,4 +125,11 @@ public interface IUserService
 	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
 	/// <returns>A ServiceResult object that contains the result of the password reset operation.</returns>
 	Task<ServiceResult<IdentityResult>> ResetPasswordAsync(string userId, string decodedToken, string requestNewPassword, CancellationToken ct);
+
+	/// <summary>
+	/// Checks if a user's email is confirmed.
+	/// </summary>
+	/// <param name="user">The user to check.</param>
+	/// <returns>True if the email is confirmed; otherwise, false.</returns>
+	Task<bool> IsEmailConfirmedAsync(IdentityUser user);
 }

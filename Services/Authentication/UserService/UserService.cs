@@ -148,4 +148,11 @@ public class UserService : IUserService
 
 		return new ServiceResult<IdentityResult>(true, HttpStatusCode.OK, "Password has been successfully reset.", result);
 	}
+	
+	
+	/// <inheritdoc />
+	public async Task<bool> IsEmailConfirmedAsync(IdentityUser user)
+	{
+		return user.EmailConfirmed;
+	}
 }
