@@ -13,15 +13,15 @@ public partial class AuthenticationOrchestrator
 		if (user is null)
 		{
 			return await _responseService.HandleResultAsync(
-				new ServiceResult<string>(false, HttpStatusCode.NotFound, "User with this email not found."));
+				new ServiceResult<string>(false, HttpStatusCode.BadRequest, "If account exist a activation email will be sent. Please check your email."));
 		}
 
 		// Check if email is already confirmed
 		var isEmailConfirmed = await _userService.IsEmailConfirmedAsync(user);
-		if (isEmailConfirmed)
+		if (isEmailConfirmed is false)
 		{
 			return await _responseService.HandleResultAsync(
-				new ServiceResult<string>(false, HttpStatusCode.BadRequest, "This email address is already confirmed."));
+				new ServiceResult<string>(false, HttpStatusCode.BadRequest, "If account exist a activation email will be sent. Please check your email."));
 		}
 
 		// Generate email confirmation token
@@ -52,6 +52,6 @@ public partial class AuthenticationOrchestrator
 		}
 
 		return await _responseService.HandleResultAsync(
-			new ServiceResult<string>(true, HttpStatusCode.OK, "Activation email has been resent. Please check your email."));
+			new ServiceResult<string>(true, HttpStatusCode.OK, "If account exist a activation email will be sent. Please check your email."));
 	}
 }
