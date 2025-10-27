@@ -48,12 +48,12 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the activation process.</returns>
 	Task<IActionResult> HandleActivateUserAsync(string userId, string token, CancellationToken ctx = default);
-	
+
 	/// <summary>
 	/// Handles the forgot password process.
 	/// </summary>
 	Task<IActionResult> HandleForgotPasswordAsync(string email, CancellationToken ct);
-
+	
 	/// <summary>
 	/// Handles the password reset process by verifying the reset token and updating the user's password.
 	/// </summary>
@@ -63,6 +63,7 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password reset process.</returns>
 	Task<IActionResult> HandleResetPasswordAsync(string userId, string token, AuthenticationOrchestrator.ResetPasswordRequestDto request, CancellationToken ct);
+
 	
 	/// <summary>
 	/// Handles resending the activation email to a user.
@@ -71,4 +72,14 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ctx">The cancellation token to monitor for cancellation requests.</param>
 	/// <returns>An IActionResult indicating the outcome of the resend operation.</returns>
 	Task<IActionResult> HandleResendActivationMailAsync(string email, CancellationToken ctx = default);
+
+	/// <summary>
+	/// Handles the password reset process by verifying the reset token and updating the user's password.
+	/// </summary>
+	/// <param name="request">The unique identifier of the user requesting the password reset.</param>
+	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
+	/// <param name="token">The password reset token to verify.</param>
+	/// <param name="request">The reset password request containing the new password.</param>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password reset process.</returns>
+	Task<IActionResult> HandleDeleteUserAsync(AuthenticationOrchestrator.DeleteUserRequestDto request, CancellationToken ctx = default);
 }
