@@ -5,7 +5,9 @@ namespace Services.Authentication;
 
 public partial class AuthenticationOrchestrator
 {
-    
+    /// <summary>
+    /// Represents a data transfer object for deleting a user, containing the necessary information to process the deletion request.
+    /// </summary>
     public class DeleteUserRequestDto
     {
         public string Password { get; set; }
@@ -31,7 +33,7 @@ public partial class AuthenticationOrchestrator
             var promptCredentials = await _userService.PasswordSignInAsync(userId,request.Password);
             if (promptCredentials is false)
             {
-                return new BadRequestObjectResult(new { Message = "Failed to prompt credentials." });
+                return new UnauthorizedObjectResult(new { Message = "Failed to prompt credentials." });
             }
 
             // Delete the user

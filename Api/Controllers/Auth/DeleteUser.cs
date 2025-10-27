@@ -19,7 +19,7 @@ public partial class AuthController
     /// <param name="request">User password for confirmation.</param>
     /// <param name="ctx">The cancellation token.</param>
     /// <returns>An IActionResult indicating the result of the operation.</returns>
-    [HttpDelete("{userId}")]
+    [HttpDelete]
     [Authorize] 
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -27,7 +27,7 @@ public partial class AuthController
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest request, CancellationToken ctx = default)
     {
-     return await _orchestrator.HandleDeleteUserAsync(request.Adapt<AuthenticationOrchestrator.DeleteUserRequestDto>(), ctx);
+		return await _orchestrator.HandleDeleteUserAsync(request.Adapt<AuthenticationOrchestrator.DeleteUserRequestDto>(), ctx);
     }
 
 
