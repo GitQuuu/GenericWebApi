@@ -12,13 +12,16 @@ builder.Services.AddScoped<IdentitySeeder>();
 builder.Services.AddDatabaseConfiguration(builder.Configuration);
 builder.Services.AddIdentityConfiguration();
 builder.Services.AddApplicationServices();
-builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddSwaggerConfiguration(builder.Configuration);
 
 var app = builder.Build();
 
 // Seed database
-await app.SeedDatabaseAsync();
+if (builder.Environment.IsDevelopment())
+{
+    await app.SeedDatabaseAsync();
+}
 
 // Configure middleware pipeline
 app.ConfigureDevelopmentMiddleware();

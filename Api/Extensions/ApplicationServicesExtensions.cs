@@ -17,6 +17,9 @@ using Services.ResponseService;
 
 namespace Api.Extensions;
 
+/// <summary>
+/// Provides extension methods for configuring application services.
+/// </summary>
 public static class ApplicationServicesExtensions
 {
 	/// <summary>
@@ -48,23 +51,24 @@ public static class ApplicationServicesExtensions
 	/// <summary>
 	/// Configures JWT authentication with multiple schemes (Local, Entra, Google)
 	/// </summary>
-	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
 	{
 		services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
-			.AddLocalJwtBearer(configuration)
+			.AddLocalJwtBearer(configuration, environment)
 			.AddEntraJwtBearer(configuration)
 			.AddGoogleJwtBearer(configuration);
 	}
 	
-	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)
+	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration, IWebHostEnvironment environment)
 	{
 		return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 		{
-			options.RequireHttpsMetadata = false; // Allow HTTP for development
+			// Require HTTPS in production, allow HTTP in development
+			options.RequireHttpsMetadata = !environment.IsDevelopment();
 			options.SaveToken = true;
 			options.TokenValidationParameters = new TokenValidationParameters
 			{
@@ -81,25 +85,28 @@ public static class ApplicationServicesExtensions
 				RoleClaimType = ClaimTypes.Role,
 			};
 			
-			// Add event handlers for debugging
-			options.Events = new JwtBearerEvents
+			// Add event handlers for debugging in development
+			if (environment.IsDevelopment())
 			{
-				OnAuthenticationFailed = context =>
+				options.Events = new JwtBearerEvents
 				{
-					Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-					return Task.CompletedTask;
-				},
-				OnTokenValidated = context =>
-				{
-					Console.WriteLine("Token validated successfully");
-					return Task.CompletedTask;
-				},
-				OnChallenge = context =>
-				{
-					Console.WriteLine($"OnChallenge: {context.Error}, {context.ErrorDescription}");
-					return Task.CompletedTask;
-				}
-			};
+					OnAuthenticationFailed = context =>
+					{
+						Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+						return Task.CompletedTask;
+					},
+					OnTokenValidated = context =>
+					{
+						Console.WriteLine("Token validated successfully");
+						return Task.CompletedTask;
+					},
+					OnChallenge = context =>
+					{
+						Console.WriteLine($"OnChallenge: {context.Error}, {context.ErrorDescription}");
+						return Task.CompletedTask;
+					}
+				};
+			}
 		});
 	}
 	
