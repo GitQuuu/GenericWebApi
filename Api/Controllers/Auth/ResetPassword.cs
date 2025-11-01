@@ -39,7 +39,7 @@ public partial class AuthController
 	/// <para>Query parameters (userId, token) come from the email callback URL.</para>
 	/// </remarks>
 	/// <returns>An IActionResult indicating success or failure of the password reset.</returns>
-	[HttpGet("ResetPassword")]
+	[HttpPost("ResetPassword")]
 	public async Task<IActionResult> ResetPassword(
 		[FromQuery] string userId,
 		[FromQuery] string token,
