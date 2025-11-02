@@ -67,19 +67,26 @@ public static class ApplicationServicesExtensions
 	{
 		return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 		{
+			// Debug: Log configuration values
+			var signingKey = configuration["Auth:Local:SigningKey"];
+			var issuer = configuration["Auth:Local:Issuer"];
+			var audience = configuration["Auth:Local:Audience"];
+			
+			Console.WriteLine($"JWT Config - Issuer: {issuer}, Audience: {audience}, SigningKey Length: {signingKey?.Length}");
+			
 			// Require HTTPS in production, allow HTTP in development
 			options.RequireHttpsMetadata = !environment.IsDevelopment();
 			options.SaveToken = true;
 			options.TokenValidationParameters = new TokenValidationParameters
 			{
 				ValidateIssuer = true,
-				ValidIssuer = configuration["Auth:Local:Issuer"],
+				ValidIssuer = issuer,
 				ValidateAudience = true,
-				ValidAudience = configuration["Auth:Local:Audience"],
+				ValidAudience = audience,
 				ValidateLifetime = true,
 				ValidateIssuerSigningKey = true,
 				IssuerSigningKey = new SymmetricSecurityKey(
-					Encoding.UTF8.GetBytes(configuration["Auth:Local:SigningKey"]!)),
+					Encoding.UTF8.GetBytes(signingKey!)),
 				ClockSkew = TimeSpan.FromMinutes(3),
 				NameClaimType = ClaimTypes.Name,
 				RoleClaimType = ClaimTypes.Role,
