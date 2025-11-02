@@ -17,6 +17,9 @@ using Services.ResponseService;
 
 namespace Api.Extensions;
 
+/// <summary>
+/// Provides extension methods for configuring application services.
+/// </summary>
 public static class ApplicationServicesExtensions
 {
 	/// <summary>
@@ -48,38 +51,69 @@ public static class ApplicationServicesExtensions
 	/// <summary>
 	/// Configures JWT authentication with multiple schemes (Local, Entra, Google)
 	/// </summary>
-	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
 	{
 		services.AddAuthentication(options =>
 			{
 				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
-			.AddLocalJwtBearer(configuration)
+			.AddLocalJwtBearer(configuration, environment)
 			.AddEntraJwtBearer(configuration)
 			.AddGoogleJwtBearer(configuration);
 	}
 	
-	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration)
+	private static AuthenticationBuilder AddLocalJwtBearer(this AuthenticationBuilder builder, IConfiguration configuration, IWebHostEnvironment environment)
 	{
 		return builder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 		{
-			options.RequireHttpsMetadata = true;
+			// Debug: Log configuration values
+			var signingKey = configuration["Auth:Local:SigningKey"];
+			var issuer = configuration["Auth:Local:Issuer"];
+			var audience = configuration["Auth:Local:Audience"];
+			
+			Console.WriteLine($"JWT Config - Issuer: {issuer}, Audience: {audience}, SigningKey Length: {signingKey?.Length}");
+			
+			// Require HTTPS in production, allow HTTP in development
+			options.RequireHttpsMetadata = !environment.IsDevelopment();
 			options.SaveToken = true;
 			options.TokenValidationParameters = new TokenValidationParameters
 			{
 				ValidateIssuer = true,
-				ValidIssuer = configuration["Auth:Local:Issuer"],
+				ValidIssuer = issuer,
 				ValidateAudience = true,
-				ValidAudience = configuration["Auth:Local:Audience"],
+				ValidAudience = audience,
 				ValidateLifetime = true,
 				ValidateIssuerSigningKey = true,
 				IssuerSigningKey = new SymmetricSecurityKey(
-					Encoding.UTF8.GetBytes(configuration["Auth:Local:SigningKey"]!)),
+					Encoding.UTF8.GetBytes(signingKey!)),
 				ClockSkew = TimeSpan.FromMinutes(3),
 				NameClaimType = ClaimTypes.Name,
 				RoleClaimType = ClaimTypes.Role,
 			};
+			
+			// Add event handlers for debugging in development
+			if (environment.IsDevelopment())
+			{
+				options.Events = new JwtBearerEvents
+				{
+					OnAuthenticationFailed = context =>
+					{
+						Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+						return Task.CompletedTask;
+					},
+					OnTokenValidated = context =>
+					{
+						Console.WriteLine("Token validated successfully");
+						return Task.CompletedTask;
+					},
+					OnChallenge = context =>
+					{
+						Console.WriteLine($"OnChallenge: {context.Error}, {context.ErrorDescription}");
+						return Task.CompletedTask;
+					}
+				};
+			}
 		});
 	}
 	
@@ -176,11 +210,11 @@ public static class ApplicationServicesExtensions
 			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 			{
 				Name = "Authorization",
-				Type = SecuritySchemeType.ApiKey,
-				Scheme = "Bearer",
+				Type = SecuritySchemeType.Http,
+				Scheme = "bearer",
 				BearerFormat = "JWT",
 				In = ParameterLocation.Header,
-				Description = "Enter 'Bearer' [space] and then your token.",
+				Description = "JWT Authorization header using the Bearer scheme. Just enter your token below (no need to type 'Bearer').",
 			});
 			
 			options.AddSecurityRequirement(new OpenApiSecurityRequirement

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Authentication.UserService;
 
@@ -75,4 +76,70 @@ public interface IUserService
 	/// <param name="password">The password to validate.</param>
 	/// <returns>True if the credentials are valid and the account is not locked out; otherwise, false.</returns>
 	Task<bool> PasswordSignInAsync(string email, string password);
+
+	/// <summary>
+	/// Creates a new user with the specified email and password.
+	/// </summary>
+	/// <param name="email">The email address for the new user.</param>
+	/// <param name="password">The password for the new user.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> CreateUserAsync(string email, string password);
+
+	/// <summary>
+	/// Generates an email confirmation token for the specified user.
+	/// </summary>
+	/// <param name="user">The user to generate the token for.</param>
+	/// <returns>The email confirmation token.</returns>
+	Task<string> GenerateEmailConfirmationTokenAsync(IdentityUser user);
+
+	/// <summary>
+	/// Confirms a user's email address using the provided token.
+	/// </summary>
+	/// <param name="user">The user whose email should be confirmed.</param>
+	/// <param name="token">The email confirmation token.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> ConfirmEmailAsync(IdentityUser user, string token);
+
+	/// <summary>
+	/// Deletes a user from the system.
+	/// </summary>
+	/// <param name="user">The user to delete.</param>
+	/// <returns>An IdentityResult indicating success or failure.</returns>
+	Task<IdentityResult> DeleteAsync(IdentityUser user);
+
+	/// <summary>
+	/// Handles the process of initiating a password reset for a user.
+	/// </summary>
+	/// <param name="email">The email address of the user requesting the password reset.</param>
+	/// <param name="ct">The cancellation token to monitor for cancellation requests.</param>
+	/// <returns>An IActionResult indicating the outcome of the password reset initiation.</returns>
+	Task<ServiceResult<Tuple<IdentityUser, string>>> ForgotPasswordAsync(string email, CancellationToken ct);
+
+	/// <summary>
+	/// Resets a user's password using the provided reset token and new password.
+	/// </summary>
+	/// <typeparam name="T">The type of result expected from the operation.</typeparam>
+	/// <param name="userId">The unique identifier of the user whose password is to be reset.</param>
+	/// <param name="decodedToken">The decoded reset token for the password reset process.</param>
+	/// <param name="requestNewPassword">The new password to be set for the user.</param>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult object that contains the result of the password reset operation.</returns>
+	Task<ServiceResult<IdentityResult>> ResetPasswordAsync(string userId, string decodedToken, string requestNewPassword, CancellationToken ct);
+
+	/// <summary>
+	/// Checks if a user's email is confirmed.
+	/// </summary>
+	/// <param name="user">The user to check.</param>
+	/// <returns>True if the email is confirmed; otherwise, false.</returns>
+	Task<bool> IsEmailConfirmedAsync(IdentityUser user);
+
+	/// <summary>
+	/// Changes a user's password after verifying the current password.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user whose password is to be changed.</param>
+	/// <param name="currentPassword">The user's current password for verification.</param>
+	/// <param name="newPassword">The new password to be set for the user.</param>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult object that contains the result of the password change operation.</returns>
+	Task<ServiceResult<IdentityResult>> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken ct);
 }
