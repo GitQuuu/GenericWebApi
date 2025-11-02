@@ -210,11 +210,11 @@ public static class ApplicationServicesExtensions
 			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 			{
 				Name = "Authorization",
-				Type = SecuritySchemeType.ApiKey,
-				Scheme = "Bearer",
+				Type = SecuritySchemeType.Http,
+				Scheme = "bearer",
 				BearerFormat = "JWT",
 				In = ParameterLocation.Header,
-				Description = "Enter 'Bearer' [space] and then your token.",
+				Description = "JWT Authorization header using the Bearer scheme. Just enter your token below (no need to type 'Bearer').",
 			});
 			
 			options.AddSecurityRequirement(new OpenApiSecurityRequirement
