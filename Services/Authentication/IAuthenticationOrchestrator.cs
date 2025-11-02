@@ -75,7 +75,6 @@ public interface IAuthenticationOrchestrator
 
 	/// <summary>
 	/// Handles the deletion of a user account.
-	/// </summary>
 	/// <param name="request">The unique identifier of the user requesting the account deletion.</param>
 	/// <param name="ctx">An optional CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the deletion process.</returns>
@@ -89,4 +88,13 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the password change process.</returns>
 	Task<IActionResult> HandleChangePasswordAsync(string userId, AuthenticationOrchestrator.ChangePasswordRequestDto request, CancellationToken ct);
+
+	/// <summary>
+	/// Handles the admin process to set a user account's activation status.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user.</param>
+	/// <param name="isActive">True to activate the account, false to deactivate it.</param>
+	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the operation.</returns>
+	Task<IActionResult> HandleSetUserAccountStatusAsync(string userId, bool isActive, CancellationToken ct);
 }
