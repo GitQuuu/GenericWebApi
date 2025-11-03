@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services;
 
 namespace Api.Controllers.Admin;
 
@@ -26,7 +27,7 @@ public partial class AdminUserController
 	/// </remarks>
 	/// <returns>An IActionResult indicating success or failure of the operation.</returns>
 	[HttpPut("SetStatus/{userId}")]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ServiceResult<bool>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
