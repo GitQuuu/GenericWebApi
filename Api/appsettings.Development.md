@@ -270,6 +270,79 @@ Default sender information for outgoing emails.
 
 ---
 
+## Seed
+
+Configuration for database seeding with initial data (roles and admin user).
+
+### Seed:Admin
+
+Configuration for the default admin user created during database seeding.
+
+#### `Seed:Admin:Email`
+- **Type**: String (Email)
+- **Default**: `"admin@example.com"`
+- **Purpose**: The email address for the default admin user. This user is automatically created when the application starts in development mode.
+- **Required**: Yes - Application will throw an exception if not configured.
+- **Example Values**:
+  - `"admin@example.com"`
+  - `"superadmin@mycompany.com"`
+  - `"root@localhost"`
+
+#### `Seed:Admin:Password`
+- **Type**: String
+- **Default**: `"Admin@1234"`
+- **Purpose**: The password for the default admin user. Must meet password complexity requirements (uppercase, lowercase, number, special character).
+- **Required**: Yes - Application will throw an exception if not configured.
+- **Security**: Change this to a strong password and consider using user secrets or environment variables.
+- **Example Values**:
+  - `"Admin@1234"`
+  - `"SuperSecure123!"`
+  - `"MyStr0ng!Pass"`
+
+#### `Seed:Admin:FirstName`
+- **Type**: String
+- **Default**: `"Admin"`
+- **Purpose**: The first name for the admin user's profile.
+- **Required**: Yes - Application will throw an exception if not configured.
+- **Example Values**:
+  - `"Admin"`
+  - `"System"`
+  - `"John"`
+
+#### `Seed:Admin:LastName`
+- **Type**: String
+- **Default**: `"Example"`
+- **Purpose**: The last name for the admin user's profile.
+- **Required**: Yes - Application will throw an exception if not configured.
+- **Example Values**:
+  - `"Example"`
+  - `"Administrator"`
+  - `"Doe"`
+
+### `Seed:Roles`
+- **Type**: Array of Strings
+- **Default**: `["Admin", "User"]`
+- **Purpose**: List of roles to create in the database during seeding. These roles are used for authorization throughout the application.
+- **Required**: No - If not configured, role seeding will be skipped with a warning.
+- **Example Values**:
+  - `["Admin", "User"]`
+  - `["Admin", "User", "Manager", "Guest"]`
+  - `["SuperAdmin", "Admin", "Editor", "Viewer"]`
+
+### `Seed:AdminRoles`
+- **Type**: Array of Strings
+- **Default**: `["Admin"]`
+- **Purpose**: List of roles to assign to the default admin user. The admin user will be granted all roles specified in this array.
+- **Required**: No - If not configured, role assignment will be skipped with a warning.
+- **Example Values**:
+  - `["Admin"]`
+  - `["Admin", "User"]`
+  - `["SuperAdmin", "Admin"]`
+
+**Note**: Seeding only runs in Development environment by default. The admin user and roles are created only if they don't already exist.
+
+---
+
 ## Security Best Practices
 
 ⚠️ **IMPORTANT**: This is a development configuration file. For production:
@@ -316,6 +389,12 @@ dotnet user-secrets set "Auth:Entra:Audience" "api://your-app-id"
 
 # Email Password
 dotnet user-secrets set "Email:Smtp:Password" "your-smtp-password"
+
+# Seed Configuration (Admin User)
+dotnet user-secrets set "Seed:Admin:Email" "admin@mycompany.com"
+dotnet user-secrets set "Seed:Admin:Password" "YourSecurePassword123!"
+dotnet user-secrets set "Seed:Admin:FirstName" "Super"
+dotnet user-secrets set "Seed:Admin:LastName" "Admin"
 ```
 
 Run these commands from the `Api` project directory.
