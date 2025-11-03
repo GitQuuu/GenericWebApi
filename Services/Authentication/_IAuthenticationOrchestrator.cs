@@ -104,4 +104,13 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult with the list of users.</returns>
 	Task<IActionResult> HandleGetAllUsersAsync(CancellationToken ct);
+
+	/// <summary>
+	/// Handles the admin process to delete a user account.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user to delete.</param>
+	/// <param name="password">The admin's password for confirmation.</param>
+	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the deletion operation.</returns>
+	Task<IActionResult> HandleAdminDeleteUserAsync(string userId, string password, CancellationToken ct);
 }

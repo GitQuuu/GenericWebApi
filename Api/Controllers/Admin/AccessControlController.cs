@@ -10,12 +10,12 @@ namespace Api.Controllers.Admin;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
-public partial class AdminUserController : ControllerBase
+public partial class AccessControlController : ControllerBase
 {
 	private readonly IAuthenticationOrchestrator _orchestrator;
 
 	/// <inheritdoc />
-	public AdminUserController(IAuthenticationOrchestrator orchestrator)
+	public AccessControlController(IAuthenticationOrchestrator orchestrator)
 	{
 		_orchestrator = orchestrator;
 	}

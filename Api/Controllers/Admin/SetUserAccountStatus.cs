@@ -4,7 +4,7 @@ using Services;
 
 namespace Api.Controllers.Admin;
 
-public partial class AdminUserController
+public partial class AccessControlController
 {
 	/// <summary>
 	/// Sets the activation status of a user account (Admin only).

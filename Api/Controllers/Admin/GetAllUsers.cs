@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Admin;
 
-public partial class AdminUserController
+public partial class AccessControlController
 {
 	/// <summary>
 	/// Gets a list of all users in the system (Admin only).
