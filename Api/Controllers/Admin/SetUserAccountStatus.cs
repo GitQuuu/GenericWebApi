@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Controllers.Users;
+namespace Api.Controllers.Admin;
 
-public partial class UserController
+public partial class AdminUserController
 {
 	/// <summary>
 	/// Sets the activation status of a user account (Admin only).
@@ -26,7 +25,6 @@ public partial class UserController
 	/// </remarks>
 	/// <returns>An IActionResult indicating success or failure of the operation.</returns>
 	[HttpPut("SetStatus/{userId}")]
-	[Authorize(Roles = "Admin")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
