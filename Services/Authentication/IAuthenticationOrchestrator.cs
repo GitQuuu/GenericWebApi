@@ -97,4 +97,11 @@ public interface IAuthenticationOrchestrator
 	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
 	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult indicating the result of the operation.</returns>
 	Task<IActionResult> HandleSetUserAccountStatusAsync(string userId, bool isActive, CancellationToken ct);
+
+	/// <summary>
+	/// Handles retrieving all users in the system.
+	/// </summary>
+	/// <param name="ct">A CancellationToken to observe while waiting for the task to complete.</param>
+	/// <returns>A Task representing the asynchronous operation, which contains an IActionResult with the list of users.</returns>
+	Task<IActionResult> HandleGetAllUsersAsync(CancellationToken ct);
 }

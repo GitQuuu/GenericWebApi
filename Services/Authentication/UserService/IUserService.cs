@@ -151,4 +151,11 @@ public interface IUserService
 	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
 	/// <returns>A ServiceResult indicating success or failure of the operation.</returns>
 	Task<ServiceResult<IdentityUser>> SetUserAccountStatusAsync(string userId, bool isActive, CancellationToken ct);
+
+	/// <summary>
+	/// Gets all users in the system.
+	/// </summary>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult containing a list of all users.</returns>
+	Task<ServiceResult<IEnumerable<IdentityUser>>> GetAllUsersAsync(CancellationToken ct);
 }
