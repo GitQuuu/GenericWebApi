@@ -1,4 +1,4 @@
-﻿using DAL.Entities;
+using DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,11 +13,6 @@ public class IdentitySeeder
     private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<IdentitySeeder> _logger;
-
-    private const string DefaultAdminEmail = "admin@example.com";
-    private const string DefaultAdminPassword = "Admin@1234";
-    private static readonly string[] Roles = { "Admin", "User" };
-    private static readonly string[] AdminUserRoles = { "Admin" };
 
     public IdentitySeeder(
         UserManager<IdentityUser> userManager,
@@ -45,7 +40,14 @@ public class IdentitySeeder
 
     private async Task SeedRolesAsync()
     {
-        foreach (var role in Roles)
+        var roles = _configuration.GetSection("Seed:Roles").Get<string[]>();
+        if (roles == null || roles.Length == 0)
+        {
+            _logger.LogWarning("No roles configured in Seed:Roles. Skipping role seeding.");
+            return;
+        }
+        
+        foreach (var role in roles)
         {
             if (!await _roleManager.RoleExistsAsync(role))
             {
@@ -57,8 +59,13 @@ public class IdentitySeeder
 
     private async Task<IdentityUser> GetOrCreateAdminUserAsync()
     {
-        var email = _configuration["Seed:Admin:Email"] ?? DefaultAdminEmail;
-        var password = _configuration["Seed:Admin:Password"] ?? DefaultAdminPassword;
+        var email = _configuration["Seed:Admin:Email"];
+        var password = _configuration["Seed:Admin:Password"];
+        
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+        {
+            throw new InvalidOperationException("Admin email and password must be configured in Seed:Admin section.");
+        }
 
         var user = await _userManager.FindByEmailAsync(email);
         if (user != null)
@@ -87,7 +94,14 @@ public class IdentitySeeder
 
     private async Task AssignRolesToAdminUserAsync(IdentityUser user)
     {
-        foreach (var role in AdminUserRoles)
+        var adminRoles = _configuration.GetSection("Seed:AdminRoles").Get<string[]>();
+        if (adminRoles == null || adminRoles.Length == 0)
+        {
+            _logger.LogWarning("No admin roles configured in Seed:AdminRoles. Skipping role assignment.");
+            return;
+        }
+        
+        foreach (var role in adminRoles)
         {
             if (!await _userManager.IsInRoleAsync(user, role))
             {
@@ -109,11 +123,20 @@ public class IdentitySeeder
         }
 
         _logger.LogInformation("Creating UserProfile for {Email}", aspNetUser.Email);
+        
+        var firstName = _configuration["Seed:Admin:FirstName"];
+        var lastName = _configuration["Seed:Admin:LastName"];
+        
+        if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+        {
+            throw new InvalidOperationException("Admin FirstName and LastName must be configured in Seed:Admin section.");
+        }
+        
         User user = new ()
         {
             IdentityUserId = aspNetUser.Id,
-            FirstName      = "Admin",
-            LastName       = "Example",
+            FirstName      = firstName,
+            LastName       = lastName,
             IdentityUser   = aspNetUser,
         };
 
