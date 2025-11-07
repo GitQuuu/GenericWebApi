@@ -1,7 +1,11 @@
+using Api.Middlewares;
 using DAL;
 
 namespace Api.Extensions;
 
+/// <summary>
+/// Provides extension methods for configuring middleware in an ASP.NET Core application.
+/// </summary>
 public static class MiddlewareExtensions
 {
 	/// <summary>
@@ -61,4 +65,14 @@ public static class MiddlewareExtensions
 		app.UseAuthorization();
 		app.MapControllers();
 	}
+
+	/// <summary>
+	/// Adds middleware to enforce authentication on Swagger endpoints with basic authorization.
+	/// </summary>
+	/// <param name="app">An instance of the <see cref="WebApplication"/> to configure the middleware.</param>
+	public static void UseSwaggerAuthorized(this WebApplication app)
+	{
+		app.UseMiddleware<SwaggerAuthorizedMiddleware>();
+	}
+
 }
