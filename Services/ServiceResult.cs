@@ -1,8 +1,8 @@
-﻿using System.Net;
+using System.Net;
 
 namespace Services;
 
-public class ServiceResult<T> where T : class?
+public class ServiceResult<T>
 {
 	public HttpStatusCode HttpResponse { get; private set; }
 	public string? Message { get; private set; }

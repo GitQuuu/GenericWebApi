@@ -21,6 +21,11 @@ var app = builder.Build();
 if (builder.Environment.IsDevelopment())
 {
     await app.SeedDatabaseAsync();
+    builder.Configuration.AddUserSecrets<Program>();
+}
+else
+{
+    app.UseSwaggerAuthorized();
 }
 
 // Configure middleware pipeline

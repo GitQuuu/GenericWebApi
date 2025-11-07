@@ -142,4 +142,20 @@ public interface IUserService
 	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
 	/// <returns>A ServiceResult object that contains the result of the password change operation.</returns>
 	Task<ServiceResult<IdentityResult>> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken ct);
+
+	/// <summary>
+	/// Sets the activation status of a user account.
+	/// </summary>
+	/// <param name="userId">The unique identifier of the user.</param>
+	/// <param name="isActive">True to activate the account, false to deactivate it.</param>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult indicating success or failure of the operation.</returns>
+	Task<ServiceResult<IdentityUser>> SetUserAccountStatusAsync(string userId, bool isActive, CancellationToken ct);
+
+	/// <summary>
+	/// Gets all users in the system.
+	/// </summary>
+	/// <param name="ct">A cancellation token for canceling the operation, if needed.</param>
+	/// <returns>A ServiceResult containing a list of all users.</returns>
+	Task<ServiceResult<IEnumerable<IdentityUser>>> GetAllUsersAsync(CancellationToken ct);
 }
