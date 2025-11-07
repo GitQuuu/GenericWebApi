@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.AspNetCore.Authentication;
 
 namespace Api.Middlewares;
@@ -9,10 +9,12 @@ namespace Api.Middlewares;
 public class SwaggerAuthorizedMiddleware
 {
 	private readonly RequestDelegate _next;
+	private readonly IConfiguration _configuration;
 
-	public SwaggerAuthorizedMiddleware(RequestDelegate next)
+	public SwaggerAuthorizedMiddleware(RequestDelegate next, IConfiguration configuration)
 	{
 		_next = next;
+		_configuration = configuration;
 	}
 
 	public async Task Invoke(HttpContext context)
@@ -46,11 +48,10 @@ public class SwaggerAuthorizedMiddleware
 			context.Response.Headers["WWW-Authenticate"] = "Basic";
 			return;
 		}
-	
 
 		await _next.Invoke(context);
 	}
-	
+
 	/// <summary>
 	/// Checks if the provided username and password are authorized.
 	/// </summary>
@@ -59,8 +60,12 @@ public class SwaggerAuthorizedMiddleware
 	/// <returns>True if the username and password are authorized, false otherwise.</returns>
 	public bool IsAuthorized(string username, string password)
 	{
+		// Get credentials from configuration
+		var configUsername = _configuration["SwaggerAuth:Username"];
+		var configPassword = _configuration["SwaggerAuth:Password"];
+		
 		// Check that username and password are correct
-		return username.Equals("kontakt@qunication.com", StringComparison.InvariantCultureIgnoreCase)
-			&& password.Equals("Admin@1234");
+		return username.Equals(configUsername, StringComparison.InvariantCultureIgnoreCase)
+			&& password.Equals(configPassword);
 	}
 }
