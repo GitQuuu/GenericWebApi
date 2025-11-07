@@ -35,6 +35,16 @@ public static class MiddlewareExtensions
 		{
 			// The default HSTS value is 30 days. You may want to change this for production scenarios.
 			app.UseHsts();
+			
+			var allowedOrigins = app.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+				?? throw new InvalidOperationException("AllowedOrigins not configured for production.");
+			
+			app.UseCors(x => x
+				.AllowAnyHeader()
+				.AllowAnyMethod()
+				.WithOrigins(allowedOrigins)
+				.AllowCredentials()
+				.WithExposedHeaders("Authorization"));
 		}
 	}
 	
