@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,20 @@ public partial class AuthenticationOrchestrator
 	public async Task<IActionResult> HandleGetAllUsersAsync(CancellationToken ct = default)
 	{
 		ServiceResult<IEnumerable<IdentityUser>> result = await _userService.GetAllUsersAsync(ct);
-		return await _responseService.HandleResultAsync(result);
+		
+		if (!result.Success)
+		{
+			return await _responseService.HandleResultAsync(result);
+		}
+
+		var response = new GetAllUsersResponse
+		{
+			Users = result.Data.Adapt<List<GetAllUsersResponse.UserDto>>(),
+			TotalCount = result.Data.Count()
+		};
+		
+		return await _responseService.HandleResultAsync(
+			new ServiceResult<GetAllUsersResponse>(true, result.HttpResponse, result.Message, response)
+		);
 	}
 }
