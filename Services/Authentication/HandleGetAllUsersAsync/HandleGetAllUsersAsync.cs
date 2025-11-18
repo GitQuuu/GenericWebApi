@@ -16,14 +16,10 @@ public partial class AuthenticationOrchestrator
 			return await _responseService.HandleResultAsync(result);
 		}
 
-		var response = new GetAllUsersResponse
-		{
-			Users = result.Data.Adapt<List<GetAllUsersResponse.UserDto>>(),
-			TotalCount = result.Data.Count()
-		};
+		List<GetAllUsersResponse> users = result.Data.Adapt<List<GetAllUsersResponse>>();
 		
 		return await _responseService.HandleResultAsync(
-			new ServiceResult<GetAllUsersResponse>(true, result.HttpResponse, result.Message, response)
+			new ServiceResult<List<GetAllUsersResponse>>(true, result.HttpResponse, result.Message, users)
 		);
 	}
 }
