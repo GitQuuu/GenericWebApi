@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Services;
+using Services.Authentication;
 
 namespace Api.Controllers.Admin;
 
@@ -22,7 +24,7 @@ public partial class AccessControlController
 	/// </remarks>
 	/// <returns>An IActionResult containing the list of all users.</returns>
 	[HttpGet]
-	[ProducesResponseType(typeof(IdentityUser),StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ServiceResult<List<GetAllUsersResponse>>),StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllUsers(CancellationToken ct)
